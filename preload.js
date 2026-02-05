@@ -1,0 +1,118 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+const SERVER_URL = 'http://localhost:3001';
+
+// Store the current abort controller for cancelling requests
+let currentAbortController = null;
+
+// Expose safe API to renderer process via contextBridge
+contextBridge.exposeInMainWorld('electronAPI', {
+  // Abort the current ongoing request (client-side)
+  abortCurrentRequest: () => {
+    if (currentAbortController) {
+      console.log('[PRELOAD] Aborting current request');
+      currentAbortController.abort();
+      currentAbortController = null;
+    }
+  },
+
+  // Stop the backend query execution
+  stopQuery: async (chatId, provider = 'claude') => {
+    console.log('[PRELOAD] Stopping query for chatId:', chatId, 'provider:', provider);
+    try {
+      const response = await fetch(`${SERVER_URL}/api/abort`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ chatId, provider })
+      });
+      const result = await response.json();
+      console.log('[PRELOAD] Stop query result:', result);
+      return result;
+    } catch (error) {
+      console.error('[PRELOAD] Error stopping query:', error);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Send a chat message to the backend with chat ID, provider, and model
+  sendMessage: async (message, chatId, provider = 'claude', model = null) => {
+    // Abort any previous request
+    if (currentAbortController) {
+      currentAbortController.abort();
+    }
+
+    // Create new abort controller for this request
+    currentAbortController = new AbortController();
+    const signal = currentAbortController.signal;
+
+    return new Promise((resolve, reject) => {
+      console.log('[PRELOAD] Sending message to backend:', message);
+      console.log('[PRELOAD] Chat ID:', chatId);
+      console.log('[PRELOAD] Provider:', provider);
+      console.log('[PRELOAD] Model:', model);
+
+      fetch(`${SERVER_URL}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message, chatId, provider, model }),
+        signal
+      })
+        .then(response => {
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+          }
+
+          console.log('[PRELOAD] Connected to backend successfully');
+
+          // Return a custom object with methods to read the stream
+          resolve({
+            getReader: async function() {
+              const reader = response.body.getReader();
+              const decoder = new TextDecoder();
+              return {
+                read: async () => {
+                  try {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                      console.log('[PRELOAD] Stream ended');
+                    }
+                    return {
+                      done,
+                      value: done ? undefined : decoder.decode(value, { stream: true })
+                    };
+                  } catch (readError) {
+                    console.error('[PRELOAD] Read error:', readError);
+                    throw readError;
+                  }
+                }
+              };
+            }
+          });
+        })
+        .catch(error => {
+          console.error('[PRELOAD] Connection error:', error);
+          console.error('[PRELOAD] Error stack:', error.stack);
+          reject(new Error(`Failed to connect to backend: ${error.message}`));
+        });
+    });
+  },
+
+  // Get available providers from backend
+  getProviders: async () => {
+    try {
+      const response = await fetch(`${SERVER_URL}/api/providers`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('[PRELOAD] Error fetching providers:', error);
+      return { providers: ['claude'], default: 'claude' };
+    }
+  }
+});

@@ -1,0 +1,26 @@
+{
+  "name": "clawd",
+  "version": "1.0.0",
+  "description": "Clawd gateway - WhatsApp, Telegram, Signal, iMessage adapters with Claude agent runtime and multi-provider LLM support",
+  "type": "module",
+  "main": "gateway.js",
+  "bin": {
+    "clawd": "./cli.js"
+  },
+  "scripts": {
+    "start": "node cli.js start",
+    "chat": "node cli.js chat",
+    "setup": "node cli.js setup",
+    "cli": "node cli.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.1.0",
+    "@whiskeysockets/baileys": "^6.7.16",
+    "node-telegram-bot-api": "^0.66.0",
+    "oh-my-logo": "^0.4.0",
+    "pino": "^9.6.0",
+    "playwright": "^1.58.0",
+    "qrcode-terminal": "^0.12.0",
+    "zod": "^3.24.0"
+  }
+}

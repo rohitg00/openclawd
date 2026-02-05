@@ -1,0 +1,31 @@
+{
+  "name": "openclawd",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "dev": "NODE_ENV=development electron .",
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Rohit Ghumare",
+  "license": "MIT",
+  "description": "Desktop chat app with 20+ LLM providers and MCP integrations",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rohitg00/openclawd.git"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "^0.2.7",
+    "@opencode-ai/sdk": "latest",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1"
+  },
+  "optionalDependencies": {
+    "@github/copilot-sdk": "^0.1.13"
+  },
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-reload": "^2.0.0-alpha.1"
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "_comment": "Multi-credential configuration for load balancing and failover. Copy to server/auth-profiles.json",
+
+  "version": 1,
+
+  "profiles": {
+    "anthropic:default": {
+      "type": "api_key",
+      "key": "${ANTHROPIC_API_KEY}",
+      "_comment": "Primary Anthropic account"
+    },
+
+    "anthropic:enterprise": {
+      "type": "api_key",
+      "key": "${ANTHROPIC_ENTERPRISE_KEY}",
+      "_comment": "Higher rate limits, use when default is rate-limited"
+    },
+
+    "claude-pro:subscription": {
+      "type": "session",
+      "key": "${CLAUDE_SESSION_KEY}",
+      "_comment": "Claude Pro/Max subscription - no per-token cost!"
+    },
+
+    "openai:main": {
+      "type": "api_key",
+      "key": "${OPENAI_API_KEY}"
+    },
+
+    "openai:backup": {
+      "type": "api_key",
+      "key": "${OPENAI_BACKUP_KEY}"
+    },
+
+    "google:default": {
+      "type": "api_key",
+      "key": "${GEMINI_API_KEY}"
+    }
+  },
+
+  "order": {
+    "_comment": "Profile priority order per provider. First available (not in cooldown) is used.",
+    "anthropic": ["anthropic:enterprise", "anthropic:default"],
+    "openai": ["openai:main", "openai:backup"]
+  }
+}

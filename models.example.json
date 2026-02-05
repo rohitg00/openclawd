@@ -1,0 +1,31 @@
+{
+  "_comment": "Custom model configuration. Merges with built-in providers.",
+
+  "defaultModel": "anthropic/claude-opus-4-5-20251101",
+
+  "fallbacks": [
+    "openai/gpt-4o",
+    "google/gemini-1.5-pro",
+    "groq/llama-3.3-70b-versatile"
+  ],
+
+  "providers": {
+    "_comment": "Add custom providers or override built-in ones",
+
+    "custom-ollama": {
+      "baseUrl": "http://192.168.1.100:11434/v1",
+      "api": "openai-completions",
+      "models": [
+        {
+          "id": "llama3.3:70b",
+          "name": "Llama 3.3 70B (Custom Server)",
+          "reasoning": false,
+          "input": ["text"],
+          "cost": { "input": 0, "output": 0 },
+          "contextWindow": 128000,
+          "maxTokens": 8192
+        }
+      ]
+    }
+  }
+}

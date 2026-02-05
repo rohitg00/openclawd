@@ -1,0 +1,191 @@
+{
+  "_comment": "MCP Server Configuration - Copy to server/mcp-servers.json",
+  "_docs": "Browse all available servers at: GET /api/mcp/catalog",
+  "_recommended": "Get no-auth servers at: GET /api/mcp/recommended",
+
+  "_section_core": "=== CORE SERVERS (No Auth Required) ===",
+
+  "filesystem": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-filesystem", "${HOME}/projects"],
+    "enabled": false,
+    "_description": "Secure file operations with configurable access controls"
+  },
+
+  "memory": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-memory"],
+    "enabled": true,
+    "_description": "Knowledge graph-based persistent memory system"
+  },
+
+  "fetch": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-fetch"],
+    "enabled": true,
+    "_description": "Web content fetching and conversion"
+  },
+
+  "git": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-git"],
+    "enabled": false,
+    "_description": "Git repository operations"
+  },
+
+  "time": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-time"],
+    "enabled": false,
+    "_description": "Time and timezone conversion"
+  },
+
+  "sequential-thinking": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+    "enabled": false,
+    "_description": "Dynamic problem-solving through thought sequences"
+  },
+
+  "_section_developer": "=== DEVELOPER TOOLS (Requires Auth) ===",
+
+  "github": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-github"],
+    "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" },
+    "enabled": false,
+    "_description": "GitHub API - repos, issues, PRs",
+    "_setup": "Set GITHUB_TOKEN env var"
+  },
+
+  "gitlab": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-gitlab"],
+    "env": { "GITLAB_PERSONAL_ACCESS_TOKEN": "${GITLAB_TOKEN}" },
+    "enabled": false,
+    "_description": "GitLab API - projects, issues, MRs"
+  },
+
+  "linear": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-linear"],
+    "env": { "LINEAR_API_KEY": "${LINEAR_API_KEY}" },
+    "enabled": false,
+    "_description": "Linear issue tracking"
+  },
+
+  "_section_communication": "=== COMMUNICATION ===",
+
+  "slack": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-slack"],
+    "env": { "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}" },
+    "enabled": false,
+    "_description": "Slack messaging and channels"
+  },
+
+  "discord": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-discord"],
+    "env": { "DISCORD_BOT_TOKEN": "${DISCORD_BOT_TOKEN}" },
+    "enabled": false,
+    "_description": "Discord bot integration"
+  },
+
+  "_section_productivity": "=== PRODUCTIVITY ===",
+
+  "google-drive": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-gdrive"],
+    "enabled": false,
+    "_description": "Google Drive files - requires OAuth setup"
+  },
+
+  "notion": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-notion"],
+    "env": { "NOTION_API_KEY": "${NOTION_API_KEY}" },
+    "enabled": false,
+    "_description": "Notion pages and databases"
+  },
+
+  "_section_search": "=== SEARCH ===",
+
+  "brave-search": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+    "env": { "BRAVE_API_KEY": "${BRAVE_API_KEY}" },
+    "enabled": false,
+    "_description": "Web search via Brave API"
+  },
+
+  "exa": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-exa"],
+    "env": { "EXA_API_KEY": "${EXA_API_KEY}" },
+    "enabled": false,
+    "_description": "AI-powered web search"
+  },
+
+  "_section_database": "=== DATABASE ===",
+
+  "postgres": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-postgres"],
+    "env": { "POSTGRES_URL": "${POSTGRES_URL}" },
+    "enabled": false,
+    "_description": "PostgreSQL queries"
+  },
+
+  "sqlite": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-sqlite", "${HOME}/data.db"],
+    "enabled": false,
+    "_description": "SQLite database"
+  },
+
+  "_section_browser": "=== BROWSER AUTOMATION ===",
+
+  "puppeteer": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+    "enabled": false,
+    "_description": "Browser automation with Puppeteer"
+  },
+
+  "playwright": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@anthropic-ai/mcp-server-playwright"],
+    "enabled": false,
+    "_description": "Browser automation with Playwright"
+  },
+
+  "_section_custom": "=== CUSTOM SERVERS ===",
+
+  "custom-http": {
+    "type": "http",
+    "url": "https://your-mcp-server.com/endpoint",
+    "headers": { "Authorization": "Bearer ${CUSTOM_API_KEY}" },
+    "enabled": false,
+    "_description": "Example HTTP MCP server"
+  }
+}

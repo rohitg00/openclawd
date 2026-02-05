@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClawd</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Left Sidebar - Chat History -->
+    <aside class="left-sidebar" id="leftSidebar">
+      <div class="left-sidebar-header">
+        <button class="new-chat-sidebar-btn" onclick="startNewChat()" title="New chat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>New Chat</span>
+        </button>
+        <button class="sidebar-collapse-btn" id="leftSidebarToggle" title="Collapse sidebar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+      </div>
+      <div class="chat-history-list" id="chatHistoryList">
+        <!-- Chat history items will be added here -->
+      </div>
+    </aside>
+
+    <!-- Left Sidebar Expand Button (visible when collapsed) -->
+    <button class="left-sidebar-expand-btn" id="leftSidebarExpand" title="Expand chat history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="9 18 15 12 9 6"></polyline>
+      </svg>
+    </button>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Home View (shown when no messages) -->
+      <div class="home-view" id="homeView">
+      <div class="greeting-section">
+        <div class="greeting">
+          <h1 class="greeting-text">OpenClawd</h1>
+          <p class="tagline">20+ LLM Providers · MCP Integrations</p>
+        </div>
+      </div>
+
+      <div class="input-container home-input">
+        <form id="homeForm" class="input-form">
+          <div class="input-wrapper">
+            <textarea
+              id="homeInput"
+              class="message-input"
+              placeholder="Ask me anything"
+              autocomplete="off"
+              rows="1"
+            ></textarea>
+            <div class="input-controls">
+              <div class="left-controls">
+                <input type="file" id="homeFileInput" class="file-input-hidden" multiple />
+                <button type="button" class="control-btn attach-btn" id="homeAttachBtn" title="Attach file">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                </button>
+                <button type="button" class="control-btn thinking-btn" id="homeThinkingBtn" title="Extended thinking ⇧⌘E">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </button>
+              </div>
+              <div class="right-controls">
+                <!-- Provider Selector Dropdown -->
+                <div class="dropdown-container" id="homeProviderDropdown">
+                  <button type="button" class="provider-selector">
+                    <span class="provider-label">Claude</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="dropdown-menu provider-menu">
+                    <div class="dropdown-item selected" data-value="claude">
+                      <div class="item-row">
+                        <span class="item-label">Claude</span>
+                        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </div>
+                      <span class="item-desc">Anthropic API</span>
+                    </div>
+                    <div class="dropdown-item" data-value="opencode">
+                      <div class="item-row">
+                        <span class="item-label">Opencode</span>
+                      </div>
+                      <span class="item-desc">Opencode SDK</span>
+                    </div>
+                  </div>
+                </div>
+                <!-- Model Selector Dropdown -->
+                <div class="dropdown-container" id="homeModelDropdown">
+                  <button type="button" class="model-selector">
+                    <span class="model-label">Sonnet 4.5</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                  </button>
+                  <div class="dropdown-menu model-menu" data-provider="claude">
+                    <div class="dropdown-item" data-value="claude-opus-4-5-20250514">
+                      <div class="item-row">
+                        <span class="item-label">Opus 4.5</span>
+                      </div>
+                      <span class="item-desc">Most capable for complex work</span>
+                    </div>
+                    <div class="dropdown-item selected" data-value="claude-sonnet-4-5-20250514">
+                      <div class="item-row">
+                        <span class="item-label">Sonnet 4.5</span>
+                        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                      </div>
+                      <span class="item-desc">Best for everyday tasks</span>
+                    </div>
+                    <div class="dropdown-item" data-value="claude-haiku-4-5-20250514">
+                      <div class="item-row">
+                        <span class="item-label">Haiku 4.5</span>
+                      </div>
+                      <span class="item-desc">Fastest for quick answers</span>
+                    </div>
+                  </div>
+                </div>
+                <button type="submit" class="send-btn" id="homeSendBtn" disabled>
+                  <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                  </svg>
+                  <svg class="stop-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Chat View (shown when there are messages) -->
+    <div class="chat-view hidden" id="chatView">
+      <div class="chat-main">
+        <header class="chat-header">
+          <button class="chat-title-btn">
+            <span id="chatTitle">New chat</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+          <button class="new-chat-btn" onclick="startNewChat()" title="New chat">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+        </header>
+
+        <div class="messages-container" id="chatMessages">
+          <!-- Messages will be added here dynamically -->
+        </div>
+
+        <div class="chat-input-wrapper">
+          <div class="input-container">
+            <form id="chatForm" class="input-form">
+              <div class="input-wrapper">
+                <textarea
+                  id="messageInput"
+                  class="message-input"
+                  placeholder="Reply..."
+                  autocomplete="off"
+                  rows="1"
+                ></textarea>
+                <div class="input-controls">
+                  <div class="left-controls">
+                    <input type="file" id="chatFileInput" class="file-input-hidden" multiple />
+                    <button type="button" class="control-btn attach-btn" id="chatAttachBtn" title="Attach file">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                      </svg>
+                    </button>
+                    <button type="button" class="control-btn thinking-btn" id="chatThinkingBtn" title="Extended thinking ⇧⌘E">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                    </button>
+                  </div>
+                  <div class="right-controls">
+                    <!-- Provider Selector Dropdown -->
+                    <div class="dropdown-container" id="chatProviderDropdown">
+                      <button type="button" class="provider-selector">
+                        <span class="provider-label">Claude</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </button>
+                      <div class="dropdown-menu provider-menu">
+                        <div class="dropdown-item selected" data-value="claude">
+                          <div class="item-row">
+                            <span class="item-label">Claude</span>
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          </div>
+                          <span class="item-desc">Anthropic API</span>
+                        </div>
+                        <div class="dropdown-item" data-value="opencode">
+                          <div class="item-row">
+                            <span class="item-label">Opencode</span>
+                          </div>
+                          <span class="item-desc">Opencode SDK</span>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Model Selector Dropdown -->
+                    <div class="dropdown-container" id="chatModelDropdown">
+                      <button type="button" class="model-selector">
+                        <span class="model-label">Sonnet 4.5</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </button>
+                      <div class="dropdown-menu model-menu" data-provider="claude">
+                        <div class="dropdown-item" data-value="claude-opus-4-5-20250514">
+                          <div class="item-row">
+                            <span class="item-label">Opus 4.5</span>
+                          </div>
+                          <span class="item-desc">Most capable for complex work</span>
+                        </div>
+                        <div class="dropdown-item selected" data-value="claude-sonnet-4-5-20250514">
+                          <div class="item-row">
+                            <span class="item-label">Sonnet 4.5</span>
+                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          </div>
+                          <span class="item-desc">Best for everyday tasks</span>
+                        </div>
+                        <div class="dropdown-item" data-value="claude-haiku-4-5-20250514">
+                          <div class="item-row">
+                            <span class="item-label">Haiku 4.5</span>
+                          </div>
+                          <span class="item-desc">Fastest for quick answers</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button type="submit" class="send-btn" id="chatSendBtn" disabled>
+                      <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                        <polyline points="5 12 12 5 19 12"></polyline>
+                      </svg>
+                      <svg class="stop-icon hidden" viewBox="0 0 24 24" fill="currentColor">
+                        <rect x="6" y="6" width="12" height="12" rx="2"></rect>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <p class="disclaimer">Claude is AI and can make mistakes. Please double-check responses.</p>
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <h3>Progress</h3>
+          <button class="sidebar-toggle" id="sidebarToggle" title="Toggle sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Steps/Todos Section -->
+        <div class="sidebar-section">
+          <div class="section-header" id="stepsHeader">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+            <span id="stepsCount">0 steps</span>
+          </div>
+          <div class="steps-list" id="stepsList">
+            <!-- Steps will be added here -->
+            <div class="empty-state" id="emptySteps">No active tasks</div>
+          </div>
+        </div>
+
+        <!-- Tool Calls Section -->
+        <div class="sidebar-section">
+          <div class="section-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+            <span>Tool Calls</span>
+          </div>
+          <div class="tool-calls-list" id="toolCallsList">
+            <!-- Tool calls will be added here -->
+            <div class="empty-state" id="emptyTools">No tool calls yet</div>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+    </div><!-- end main-content -->
+
+    <!-- Right Sidebar Expand Button (visible when collapsed) -->
+    <button class="right-sidebar-expand-btn" id="rightSidebarExpand" title="Expand sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

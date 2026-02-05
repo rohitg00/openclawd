@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClawd</title>
+  <meta name="description" content="Open source AI desktop agent with 20+ LLM providers">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'IBM Plex Mono', monospace;
+      background: #0c0a09;
+      color: #e7e5e4;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(12,10,9,0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #292524;
+      z-index: 100;
+    }
+
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color: #fbbf24;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .nav-link {
+      color: #78716c;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover { color: #d6d3d1; }
+
+    .github-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #d6d3d1;
+      font-size: 0.85rem;
+    }
+
+    .github-link svg { width: 18px; height: 18px; }
+
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 8rem 2rem 4rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      letter-spacing: -1px;
+      margin-bottom: 1rem;
+      color: #fafaf9;
+    }
+
+    .subtitle {
+      color: #78716c;
+      font-size: 1rem;
+      margin-bottom: 3rem;
+    }
+
+    .install-box {
+      background: #1c1917;
+      border: 1px solid #292524;
+      border-radius: 8px;
+      margin-bottom: 3rem;
+    }
+
+    .install-tabs {
+      display: flex;
+      border-bottom: 1px solid #292524;
+    }
+
+    .install-tab {
+      padding: 0.75rem 1.25rem;
+      font-size: 0.8rem;
+      color: #57534e;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: color 0.2s;
+    }
+
+    .install-tab:hover { color: #a8a29e; }
+    .install-tab.active { color: #fbbf24; background: #292524; }
+
+    .install-cmd {
+      padding: 1.25rem;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .install-cmd.active { display: flex; }
+
+    .install-cmd code {
+      color: #a8a29e;
+      font-size: 0.9rem;
+    }
+
+    .install-cmd code span { color: #fbbf24; }
+
+    .copy-btn {
+      background: none;
+      border: none;
+      color: #57534e;
+      cursor: pointer;
+      padding: 0.25rem;
+      transition: color 0.2s;
+    }
+
+    .copy-btn:hover { color: #fbbf24; }
+    .copy-btn svg { width: 18px; height: 18px; }
+
+    .downloads-label {
+      color: #57534e;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .downloads {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 4rem;
+    }
+
+    .download-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: #1c1917;
+      border: 1px solid #292524;
+      border-radius: 6px;
+      color: #a8a29e;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .download-btn:hover {
+      border-color: #fbbf24;
+      color: #fbbf24;
+    }
+
+    .download-btn svg { width: 16px; height: 16px; }
+
+    .demo {
+      background: #1c1917;
+      border: 1px solid #292524;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 4rem;
+    }
+
+    .demo-bar {
+      display: flex;
+      gap: 6px;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #292524;
+    }
+
+    .demo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #44403c;
+    }
+
+    .demo-dot:first-child { background: #ef4444; }
+    .demo-dot:nth-child(2) { background: #fbbf24; }
+    .demo-dot:nth-child(3) { background: #22c55e; }
+
+    .demo-content {
+      aspect-ratio: 16/9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0c0a09;
+    }
+
+    .demo-placeholder {
+      color: #44403c;
+      font-size: 0.85rem;
+    }
+
+    .features {
+      display: grid;
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .feature {
+      color: #78716c;
+      font-size: 0.85rem;
+    }
+
+    .feature strong {
+      color: #fbbf24;
+      font-weight: 500;
+    }
+
+    footer {
+      border-top: 1px solid #292524;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .footer-links a {
+      color: #57534e;
+      font-size: 0.8rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: #fbbf24; }
+
+    .footer-copy {
+      color: #44403c;
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 1.75rem; }
+      .nav-right { gap: 1rem; }
+      .downloads { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="logo">openclawd</a>
+    <div class="nav-right">
+      <a href="https://github.com/rohitg00/openclawd#readme" class="nav-link">Docs</a>
+      <a href="https://github.com/rohitg00/openclawd/releases" class="nav-link">Releases</a>
+      <a href="https://github.com/rohitg00/openclawd" class="github-link">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+  </nav>
+
+  <main>
+    <h1>The open source AI agent</h1>
+    <p class="subtitle">20+ LLM providers. MCP integrations. Desktop and messaging.</p>
+
+    <div class="install-box">
+      <div class="install-tabs">
+        <button class="install-tab active" data-tab="npm">npm</button>
+        <button class="install-tab" data-tab="git">git</button>
+      </div>
+      <div class="install-cmd active" data-content="npm">
+        <code>npx <span>openclawd</span></code>
+        <button class="copy-btn" onclick="copy(this, 'npx openclawd')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="install-cmd" data-content="git">
+        <code>git clone <span>https://github.com/rohitg00/openclawd</span></code>
+        <button class="copy-btn" onclick="copy(this, 'git clone https://github.com/rohitg00/openclawd')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="downloads-label">Download</p>
+    <div class="downloads">
+      <a href="https://github.com/rohitg00/openclawd/releases/latest/download/OpenClawd-mac-arm64.dmg" class="download-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        macOS ARM
+      </a>
+      <a href="https://github.com/rohitg00/openclawd/releases/latest/download/OpenClawd-mac-x64.dmg" class="download-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        macOS Intel
+      </a>
+      <a href="https://github.com/rohitg00/openclawd/releases/latest/download/OpenClawd-win-x64.exe" class="download-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+        Windows
+      </a>
+      <a href="https://github.com/rohitg00/openclawd/releases/latest/download/OpenClawd-linux-x64.AppImage" class="download-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 00-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.132 1.884 1.071.771-.06 1.592-.536 2.257-1.306.631-.765 1.683-1.084 2.378-1.503.348-.199.629-.469.649-.853.023-.4-.2-.811-.714-1.376v-.097l-.003-.003c-.17-.2-.25-.535-.338-.926-.085-.401-.182-.786-.492-1.046h-.003c-.059-.054-.123-.067-.188-.135a.357.357 0 00-.19-.064c.431-1.278.264-2.55-.173-3.694-.533-1.41-1.465-2.638-2.175-3.483-.796-1.005-1.576-1.957-1.56-3.368.026-2.152.236-6.133-3.544-6.139z"/></svg>
+        Linux
+      </a>
+    </div>
+
+    <div class="demo">
+      <div class="demo-bar">
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+        <div class="demo-dot"></div>
+      </div>
+      <div class="demo-content">
+        <span class="demo-placeholder">~</span>
+      </div>
+    </div>
+
+    <div class="features">
+      <p class="feature"><strong>Providers</strong> — Claude, GPT, Gemini, Ollama, Groq, OpenRouter, Bedrock, and 15+ more</p>
+      <p class="feature"><strong>Tools</strong> — 20+ MCP servers. GitHub, Slack, databases, browser automation</p>
+      <p class="feature"><strong>Platforms</strong> — Desktop app + WhatsApp, Telegram, Signal, iMessage bot</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      <a href="https://github.com/rohitg00/openclawd">GitHub</a>
+      <a href="https://github.com/rohitg00/openclawd/releases">Releases</a>
+      <a href="https://github.com/rohitg00/openclawd/issues">Issues</a>
+    </div>
+    <p class="footer-copy">MIT License</p>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.install-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.install-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.install-cmd').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelector(`[data-content="${tab.dataset.tab}"]`).classList.add('active');
+      });
+    });
+
+    function copy(btn, text) {
+      navigator.clipboard.writeText(text);
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>';
+      setTimeout(() => {
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+      }, 1500);
+    }
+  </script>
+</body>
+</html>

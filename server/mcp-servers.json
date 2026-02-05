@@ -1,0 +1,63 @@
+{
+  "_comment": "MCP Server Configuration. Use ${VAR} for environment variables. Set enabled: false to disable.",
+  "_docs": "Browse all 20+ servers: GET /api/mcp/catalog | Add from catalog: POST /api/mcp/servers/from-catalog/:id",
+  "memory": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-memory"
+    ],
+    "enabled": true,
+    "_description": "Knowledge graph-based persistent memory (no auth required)"
+  },
+  "fetch": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-fetch"
+    ],
+    "enabled": true,
+    "_description": "Web content fetching and conversion (no auth required)"
+  },
+  "github": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-github"
+    ],
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+    },
+    "enabled": false,
+    "_description": "GitHub API - repos, issues, PRs (requires GITHUB_TOKEN)"
+  },
+  "slack": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-slack"
+    ],
+    "env": {
+      "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}"
+    },
+    "enabled": false,
+    "_description": "Slack messaging and channels (requires SLACK_BOT_TOKEN)"
+  },
+  "brave-search": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-brave-search"
+    ],
+    "env": {
+      "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+    },
+    "enabled": false,
+    "_description": "Web search via Brave API (requires BRAVE_API_KEY)"
+  }
+}
