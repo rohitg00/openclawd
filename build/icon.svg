@@ -1,4 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <rect width="1024" height="1024" rx="200" fill="#1a1a2e"/>
-  <text x="512" y="600" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="420" fill="#e94560">OC</text>
+  <g transform="translate(512, 480)">
+    <path d="M-120,80 C-200,140 -280,220 -320,300 C-340,340 -330,360 -300,340 C-270,320 -220,260 -160,180" fill="#D97757" opacity="0.85"/>
+    <path d="M-80,100 C-140,180 -180,280 -190,350 C-195,380 -175,390 -155,365 C-130,330 -100,250 -70,160" fill="#D97757" opacity="0.9"/>
+    <path d="M-30,110 C-50,200 -60,300 -40,370 C-30,400 -10,400 0,375 C10,340 0,260 -10,170" fill="#D97757" opacity="0.85"/>
+    <path d="M30,110 C50,200 60,300 40,370 C30,400 10,400 0,375 C-10,340 0,260 10,170" fill="#D97757" opacity="0.85"/>
+    <path d="M80,100 C140,180 180,280 190,350 C195,380 175,390 155,365 C130,330 100,250 70,160" fill="#D97757" opacity="0.9"/>
+    <path d="M120,80 C200,140 280,220 320,300 C340,340 330,360 300,340 C270,320 220,260 160,180" fill="#D97757" opacity="0.85"/>
+    <circle cx="-240" cy="260" r="10" fill="#C4623E" opacity="0.6"/>
+    <circle cx="-200" cy="230" r="8" fill="#C4623E" opacity="0.6"/>
+    <circle cx="-150" cy="280" r="9" fill="#C4623E" opacity="0.6"/>
+    <circle cx="-120" cy="250" r="7" fill="#C4623E" opacity="0.6"/>
+    <circle cx="-40" cy="300" r="9" fill="#C4623E" opacity="0.6"/>
+    <circle cx="-30" cy="260" r="7" fill="#C4623E" opacity="0.6"/>
+    <circle cx="40" cy="300" r="9" fill="#C4623E" opacity="0.6"/>
+    <circle cx="30" cy="260" r="7" fill="#C4623E" opacity="0.6"/>
+    <circle cx="150" cy="280" r="9" fill="#C4623E" opacity="0.6"/>
+    <circle cx="120" cy="250" r="7" fill="#C4623E" opacity="0.6"/>
+    <circle cx="240" cy="260" r="10" fill="#C4623E" opacity="0.6"/>
+    <circle cx="200" cy="230" r="8" fill="#C4623E" opacity="0.6"/>
+    <path d="M-180,10 C-260,-20 -320,-60 -340,-30 C-360,0 -330,30 -300,20 C-310,50 -340,70 -320,90 C-300,110 -270,80 -260,50 C-250,30 -230,20 -180,30 Z" fill="#E8845C"/>
+    <path d="M-340,-30 C-370,-50 -380,-20 -360,0" fill="none" stroke="#C4623E" stroke-width="6" stroke-linecap="round"/>
+    <path d="M180,10 C260,-20 320,-60 340,-30 C360,0 330,30 300,20 C310,50 340,70 320,90 C300,110 270,80 260,50 C250,30 230,20 180,30 Z" fill="#E8845C"/>
+    <path d="M340,-30 C370,-50 380,-20 360,0" fill="none" stroke="#C4623E" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="0" cy="0" rx="170" ry="140" fill="#D97757"/>
+    <ellipse cx="0" cy="-10" rx="150" ry="120" fill="#E8845C"/>
+    <ellipse cx="-20" cy="-40" rx="80" ry="50" fill="#F0A07A" opacity="0.4"/>
+    <ellipse cx="-65" cy="-30" rx="38" ry="42" fill="#FFF5E6"/>
+    <ellipse cx="65" cy="-30" rx="38" ry="42" fill="#FFF5E6"/>
+    <ellipse cx="-60" cy="-25" rx="22" ry="26" fill="#1a1a2e"/>
+    <ellipse cx="60" cy="-25" rx="22" ry="26" fill="#1a1a2e"/>
+    <ellipse cx="-55" cy="-30" rx="9" ry="10" fill="#FFFFFF"/>
+    <ellipse cx="55" cy="-30" rx="9" ry="10" fill="#FFFFFF"/>
+    <path d="M-40,30 Q0,65 40,30" fill="none" stroke="#1a1a2e" stroke-width="7" stroke-linecap="round"/>
+    <g transform="translate(0,-85)" opacity="0.9">
+      <circle cx="0" cy="0" r="18" fill="#1a1a2e" opacity="0.3"/>
+      <path d="M0,-10 L0,10 M-7,-6 L0,0 M7,-6 L0,0" fill="none" stroke="#FFF5E6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
 </svg>
