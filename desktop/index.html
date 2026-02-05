@@ -324,6 +324,287 @@
         <polyline points="15 18 9 12 15 6"></polyline>
       </svg>
     </button>
+
+    <!-- Settings Button (bottom left) -->
+    <button class="settings-btn" id="settingsBtn" title="Settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay hidden" id="settingsModal">
+    <div class="modal settings-modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button class="modal-close" id="closeSettings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="settings-tabs">
+        <button class="tab-btn active" data-tab="api-keys">API Keys</button>
+        <button class="tab-btn" data-tab="mcp-servers">MCP Servers</button>
+        <button class="tab-btn" data-tab="general">General</button>
+      </div>
+
+      <div class="settings-content">
+        <!-- API Keys Tab -->
+        <div class="tab-content active" id="api-keys-tab">
+          <div class="settings-section">
+            <h3>LLM Provider API Keys</h3>
+            <p class="settings-desc">Add your API keys to enable different providers. Keys are stored locally.</p>
+
+            <div class="api-key-group">
+              <label>
+                <span class="provider-name">Anthropic (Claude)</span>
+                <span class="provider-status" id="anthropic-status"></span>
+              </label>
+              <div class="input-row">
+                <input type="password" id="anthropic-key" placeholder="sk-ant-..." autocomplete="off">
+                <button class="toggle-visibility" data-target="anthropic-key">
+                  <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="api-key-group">
+              <label>
+                <span class="provider-name">OpenAI (GPT-4)</span>
+                <span class="provider-status" id="openai-status"></span>
+              </label>
+              <div class="input-row">
+                <input type="password" id="openai-key" placeholder="sk-..." autocomplete="off">
+                <button class="toggle-visibility" data-target="openai-key">
+                  <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="api-key-group">
+              <label>
+                <span class="provider-name">Google (Gemini)</span>
+                <span class="provider-status" id="google-status"></span>
+              </label>
+              <div class="input-row">
+                <input type="password" id="gemini-key" placeholder="AI..." autocomplete="off">
+                <button class="toggle-visibility" data-target="gemini-key">
+                  <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="api-key-group">
+              <label>
+                <span class="provider-name">Groq (Fast Llama)</span>
+                <span class="provider-status" id="groq-status"></span>
+              </label>
+              <div class="input-row">
+                <input type="password" id="groq-key" placeholder="gsk_..." autocomplete="off">
+                <button class="toggle-visibility" data-target="groq-key">
+                  <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="api-key-group">
+              <label>
+                <span class="provider-name">OpenRouter (200+ models)</span>
+                <span class="provider-status" id="openrouter-status"></span>
+              </label>
+              <div class="input-row">
+                <input type="password" id="openrouter-key" placeholder="sk-or-..." autocomplete="off">
+                <button class="toggle-visibility" data-target="openrouter-key">
+                  <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <details class="more-providers">
+              <summary>More Providers</summary>
+              <div class="api-key-group">
+                <label><span class="provider-name">DeepSeek</span></label>
+                <div class="input-row">
+                  <input type="password" id="deepseek-key" placeholder="sk-..." autocomplete="off">
+                  <button class="toggle-visibility" data-target="deepseek-key">
+                    <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="api-key-group">
+                <label><span class="provider-name">Mistral</span></label>
+                <div class="input-row">
+                  <input type="password" id="mistral-key" placeholder="..." autocomplete="off">
+                  <button class="toggle-visibility" data-target="mistral-key">
+                    <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="api-key-group">
+                <label><span class="provider-name">xAI (Grok)</span></label>
+                <div class="input-row">
+                  <input type="password" id="xai-key" placeholder="..." autocomplete="off">
+                  <button class="toggle-visibility" data-target="xai-key">
+                    <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="api-key-group">
+                <label><span class="provider-name">Venice AI</span></label>
+                <div class="input-row">
+                  <input type="password" id="venice-key" placeholder="..." autocomplete="off">
+                  <button class="toggle-visibility" data-target="venice-key">
+                    <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <!-- MCP Servers Tab -->
+        <div class="tab-content" id="mcp-servers-tab">
+          <div class="settings-section">
+            <h3>MCP Server Integrations</h3>
+            <p class="settings-desc">Enable external tool integrations. Some require API keys.</p>
+
+            <div class="mcp-server-list" id="mcpServerList">
+              <!-- Will be populated dynamically -->
+            </div>
+
+            <button class="add-server-btn" id="browseCatalogBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Browse MCP Catalog
+            </button>
+          </div>
+        </div>
+
+        <!-- General Tab -->
+        <div class="tab-content" id="general-tab">
+          <div class="settings-section">
+            <h3>General Settings</h3>
+
+            <div class="setting-item">
+              <label>
+                <span>Default Provider</span>
+                <select id="defaultProvider">
+                  <option value="claude">Claude (Anthropic)</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="google">Google Gemini</option>
+                  <option value="groq">Groq</option>
+                  <option value="ollama">Ollama (Local)</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <label>
+                <span>Theme</span>
+                <select id="themeSelect">
+                  <option value="dark">Dark (Amber)</option>
+                  <option value="light">Light</option>
+                  <option value="system">System</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="saveHistory" checked>
+                <span>Save chat history locally</span>
+              </label>
+            </div>
+
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="streamResponses" checked>
+                <span>Stream responses in real-time</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>Server Connection</h3>
+            <div class="setting-item">
+              <label>
+                <span>Backend URL</span>
+                <input type="text" id="backendUrl" value="http://localhost:3001" placeholder="http://localhost:3001">
+              </label>
+            </div>
+            <div class="connection-status" id="connectionStatus">
+              <span class="status-dot"></span>
+              <span class="status-text">Checking...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelSettings">Cancel</button>
+        <button class="btn-primary" id="saveSettings">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MCP Catalog Modal -->
+  <div class="modal-overlay hidden" id="mcpCatalogModal">
+    <div class="modal catalog-modal">
+      <div class="modal-header">
+        <h2>MCP Server Catalog</h2>
+        <button class="modal-close" id="closeCatalog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="catalog-filters">
+        <button class="filter-btn active" data-category="all">All</button>
+        <button class="filter-btn" data-category="core">Core</button>
+        <button class="filter-btn" data-category="database">Database</button>
+        <button class="filter-btn" data-category="developer">Developer</button>
+        <button class="filter-btn" data-category="communication">Communication</button>
+        <button class="filter-btn" data-category="browser">Browser</button>
+      </div>
+      <div class="catalog-list" id="catalogList">
+        <!-- Will be populated dynamically -->
+      </div>
+    </div>
   </div>
 
   <script src="app.js"></script>

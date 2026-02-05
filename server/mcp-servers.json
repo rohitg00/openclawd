@@ -59,5 +59,16 @@
     },
     "enabled": false,
     "_description": "Web search via Brave API (requires BRAVE_API_KEY)"
+  },
+  "git": {
+    "type": "stdio",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-git"
+    ],
+    "enabled": true,
+    "_package": "@modelcontextprotocol/server-git",
+    "_description": "Tools to read, search, and manipulate Git repositories"
   }
 }

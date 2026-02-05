@@ -1762,3 +1762,306 @@ function handleBrowserTransitionOnMessage() {
 
 // Initialize on load
 window.addEventListener('load', init);
+
+// ============================================
+// Settings Modal
+// ============================================
+
+const settingsModal = document.getElementById('settingsModal');
+const mcpCatalogModal = document.getElementById('mcpCatalogModal');
+const settingsBtn = document.getElementById('settingsBtn');
+const closeSettingsBtn = document.getElementById('closeSettings');
+const closeCatalogBtn = document.getElementById('closeCatalog');
+const saveSettingsBtn = document.getElementById('saveSettings');
+const cancelSettingsBtn = document.getElementById('cancelSettings');
+const browseCatalogBtn = document.getElementById('browseCatalogBtn');
+
+function openSettings() {
+  settingsModal?.classList.remove('hidden');
+  loadProviderStatus();
+  loadMcpServers();
+  checkConnection();
+}
+
+function closeSettings() {
+  settingsModal?.classList.add('hidden');
+}
+
+function openCatalog() {
+  mcpCatalogModal?.classList.remove('hidden');
+  loadCatalog();
+}
+
+function closeCatalog() {
+  mcpCatalogModal?.classList.add('hidden');
+}
+
+settingsBtn?.addEventListener('click', openSettings);
+closeSettingsBtn?.addEventListener('click', closeSettings);
+cancelSettingsBtn?.addEventListener('click', closeSettings);
+closeCatalogBtn?.addEventListener('click', closeCatalog);
+browseCatalogBtn?.addEventListener('click', () => {
+  closeSettings();
+  openCatalog();
+});
+
+settingsModal?.addEventListener('click', (e) => {
+  if (e.target === settingsModal) closeSettings();
+});
+
+mcpCatalogModal?.addEventListener('click', (e) => {
+  if (e.target === mcpCatalogModal) closeCatalog();
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tabId = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`${tabId}-tab`)?.classList.add('active');
+  });
+});
+
+document.querySelectorAll('.toggle-visibility').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const targetId = btn.dataset.target;
+    const input = document.getElementById(targetId);
+    if (input) {
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+  });
+});
+
+async function loadProviderStatus() {
+  try {
+    const response = await fetch(`${API_BASE}/api/settings/providers-status`);
+    const data = await response.json();
+
+    for (const [provider, configured] of Object.entries(data.status)) {
+      const statusEl = document.getElementById(`${provider}-status`);
+      if (statusEl) {
+        statusEl.textContent = configured ? 'Configured' : '';
+        statusEl.className = `provider-status${configured ? ' connected' : ''}`;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load provider status:', err);
+  }
+}
+
+async function checkConnection() {
+  const statusDot = document.querySelector('.status-dot');
+  const statusText = document.querySelector('.status-text');
+
+  try {
+    const response = await fetch(`${API_BASE}/api/health`);
+    const data = await response.json();
+
+    if (statusDot && statusText) {
+      statusDot.className = 'status-dot connected';
+      statusText.textContent = `Connected - ${data.llmProviders} providers, ${data.mcpServers} MCP servers`;
+    }
+  } catch (err) {
+    if (statusDot && statusText) {
+      statusDot.className = 'status-dot disconnected';
+      statusText.textContent = 'Disconnected - Server not running';
+    }
+  }
+}
+
+async function loadMcpServers() {
+  const listEl = document.getElementById('mcpServerList');
+  if (!listEl) return;
+
+  try {
+    const response = await fetch(`${API_BASE}/api/mcp/servers`);
+    const data = await response.json();
+
+    if (data.servers.length === 0) {
+      listEl.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">No MCP servers configured. Browse the catalog to add some.</p>';
+      return;
+    }
+
+    listEl.innerHTML = data.servers.map(server => `
+      <div class="mcp-server-item">
+        <div class="mcp-server-info">
+          <span class="mcp-server-name">${server.name}</span>
+          <span class="mcp-server-desc">${server.type} server</span>
+        </div>
+        <button class="mcp-server-toggle ${server.enabled ? 'enabled' : ''}" data-server="${server.name}"></button>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.mcp-server-toggle').forEach(toggle => {
+      toggle.addEventListener('click', async () => {
+        const serverName = toggle.dataset.server;
+        const isEnabled = toggle.classList.contains('enabled');
+        const endpoint = isEnabled ? 'disable' : 'enable';
+
+        try {
+          await fetch(`${API_BASE}/api/mcp/servers/${serverName}/${endpoint}`, { method: 'PUT' });
+          toggle.classList.toggle('enabled');
+        } catch (err) {
+          console.error('Failed to toggle server:', err);
+        }
+      });
+    });
+  } catch (err) {
+    console.error('Failed to load MCP servers:', err);
+    listEl.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">Failed to load servers</p>';
+  }
+}
+
+let catalogData = [];
+
+async function loadCatalog(category = 'all') {
+  const listEl = document.getElementById('catalogList');
+  if (!listEl) return;
+
+  try {
+    const endpoint = category === 'all' ? '/api/mcp/catalog' : `/api/mcp/catalog/${category}`;
+    const response = await fetch(`${API_BASE}${endpoint}`);
+    const data = await response.json();
+
+    catalogData = data.servers;
+    renderCatalog(catalogData);
+  } catch (err) {
+    console.error('Failed to load catalog:', err);
+    listEl.innerHTML = '<p style="color: var(--text-muted);">Failed to load catalog</p>';
+  }
+}
+
+function renderCatalog(servers) {
+  const listEl = document.getElementById('catalogList');
+  if (!listEl) return;
+
+  listEl.innerHTML = servers.map(server => `
+    <div class="catalog-item">
+      <div class="catalog-item-info">
+        <div class="catalog-item-name">
+          ${server.name}
+          ${server.noAuth ? '<span class="catalog-item-badge no-auth">No API key needed</span>' : ''}
+        </div>
+        <div class="catalog-item-desc">${server.description || ''}</div>
+      </div>
+      <button class="install-btn" data-server="${server.id}">Install</button>
+    </div>
+  `).join('');
+
+  listEl.querySelectorAll('.install-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const serverId = btn.dataset.server;
+      btn.textContent = 'Installing...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_BASE}/api/mcp/servers/from-catalog/${serverId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+
+        if (response.ok) {
+          btn.textContent = 'Installed';
+          btn.classList.add('installed');
+        } else {
+          const data = await response.json();
+          btn.textContent = data.message?.includes('exists') ? 'Already Added' : 'Failed';
+          btn.classList.add('installed');
+        }
+      } catch (err) {
+        console.error('Failed to install server:', err);
+        btn.textContent = 'Failed';
+      }
+    });
+  });
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const category = btn.dataset.category;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadCatalog(category);
+  });
+});
+
+saveSettingsBtn?.addEventListener('click', async () => {
+  const apiKeys = {
+    anthropic: document.getElementById('anthropic-key')?.value,
+    openai: document.getElementById('openai-key')?.value,
+    gemini: document.getElementById('gemini-key')?.value,
+    groq: document.getElementById('groq-key')?.value,
+    openrouter: document.getElementById('openrouter-key')?.value,
+    deepseek: document.getElementById('deepseek-key')?.value,
+    mistral: document.getElementById('mistral-key')?.value,
+    xai: document.getElementById('xai-key')?.value,
+    venice: document.getElementById('venice-key')?.value
+  };
+
+  const general = {
+    backendUrl: document.getElementById('backendUrl')?.value
+  };
+
+  const keysToSave = {};
+  for (const [k, v] of Object.entries(apiKeys)) {
+    if (v && !v.includes('••••')) keysToSave[k] = v;
+  }
+
+  if (Object.keys(keysToSave).length === 0 && !general.backendUrl) {
+    closeSettings();
+    return;
+  }
+
+  saveSettingsBtn.textContent = 'Saving...';
+  saveSettingsBtn.disabled = true;
+
+  try {
+    const response = await fetch(`${API_BASE}/api/settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKeys: keysToSave, general })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      saveSettingsBtn.textContent = 'Saved!';
+      setTimeout(() => {
+        saveSettingsBtn.textContent = 'Save Changes';
+        saveSettingsBtn.disabled = false;
+        closeSettings();
+        loadProviderStatus();
+      }, 1000);
+    } else {
+      saveSettingsBtn.textContent = 'Failed';
+      setTimeout(() => {
+        saveSettingsBtn.textContent = 'Save Changes';
+        saveSettingsBtn.disabled = false;
+      }, 2000);
+    }
+  } catch (err) {
+    console.error('Failed to save settings:', err);
+    saveSettingsBtn.textContent = 'Error';
+    setTimeout(() => {
+      saveSettingsBtn.textContent = 'Save Changes';
+      saveSettingsBtn.disabled = false;
+    }, 2000);
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (!mcpCatalogModal?.classList.contains('hidden')) {
+      closeCatalog();
+    } else if (!settingsModal?.classList.contains('hidden')) {
+      closeSettings();
+    }
+  }
+
+  if ((e.metaKey || e.ctrlKey) && e.key === ',') {
+    e.preventDefault();
+    openSettings();
+  }
+});
