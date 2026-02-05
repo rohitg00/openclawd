@@ -497,20 +497,97 @@
         <!-- MCP Servers Tab -->
         <div class="tab-content" id="mcp-servers-tab">
           <div class="settings-section">
-            <h3>MCP Server Integrations</h3>
-            <p class="settings-desc">Enable external tool integrations. Some require API keys.</p>
+            <div class="section-header">
+              <h3>MCP Servers</h3>
+              <p class="settings-desc">Connect to external tools via Model Context Protocol. Config saved to <code>mcp-servers.json</code></p>
+            </div>
 
             <div class="mcp-server-list" id="mcpServerList">
               <!-- Will be populated dynamically -->
             </div>
 
-            <button class="add-server-btn" id="browseCatalogBtn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="12" y1="5" x2="12" y2="19"></line>
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-              </svg>
-              Browse MCP Catalog
-            </button>
+            <div class="mcp-actions">
+              <button class="mcp-action-btn primary" id="addServerBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Server
+              </button>
+              <button class="mcp-action-btn" id="browseCatalogBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <rect x="3" y="3" width="7" height="7"></rect>
+                  <rect x="14" y="3" width="7" height="7"></rect>
+                  <rect x="3" y="14" width="7" height="7"></rect>
+                  <rect x="14" y="14" width="7" height="7"></rect>
+                </svg>
+                Browse Catalog
+              </button>
+              <button class="mcp-action-btn" id="viewJsonBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                  <polyline points="16,18 22,12 16,6"></polyline>
+                  <polyline points="8,6 2,12 8,18"></polyline>
+                </svg>
+                Edit JSON
+              </button>
+            </div>
+          </div>
+
+          <!-- Add Server Form (hidden by default) -->
+          <div class="settings-section hidden" id="addServerForm">
+            <div class="section-header">
+              <h3>Add MCP Server</h3>
+              <button class="close-form-btn" id="closeAddServerForm">×</button>
+            </div>
+
+            <div class="form-group">
+              <label for="serverName">Server Name</label>
+              <input type="text" id="serverName" placeholder="e.g., github, slack, custom-api">
+            </div>
+
+            <div class="form-group">
+              <label for="serverType">Type</label>
+              <select id="serverType">
+                <option value="stdio">stdio (Local command)</option>
+                <option value="http">http (Remote URL)</option>
+              </select>
+            </div>
+
+            <div class="form-group" id="stdioFields">
+              <label for="serverCommand">Command</label>
+              <input type="text" id="serverCommand" placeholder="e.g., npx">
+              <label for="serverArgs" style="margin-top: 12px;">Arguments (one per line)</label>
+              <textarea id="serverArgs" rows="3" placeholder="-y&#10;@modelcontextprotocol/server-github"></textarea>
+            </div>
+
+            <div class="form-group hidden" id="httpFields">
+              <label for="serverUrl">Server URL</label>
+              <input type="text" id="serverUrl" placeholder="https://mcp-server.example.com">
+            </div>
+
+            <div class="form-group">
+              <label for="serverEnv">Environment Variables (KEY=value, one per line)</label>
+              <textarea id="serverEnv" rows="2" placeholder="GITHUB_TOKEN=ghp_xxx&#10;API_KEY=xxx"></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn-secondary" id="cancelAddServer">Cancel</button>
+              <button class="btn-primary" id="saveNewServer">Add Server</button>
+            </div>
+          </div>
+
+          <!-- JSON Editor (hidden by default) -->
+          <div class="settings-section hidden" id="jsonEditorSection">
+            <div class="section-header">
+              <h3>MCP Configuration (JSON)</h3>
+              <button class="close-form-btn" id="closeJsonEditor">×</button>
+            </div>
+            <p class="settings-desc">Edit the raw JSON configuration. Changes are saved automatically.</p>
+            <textarea id="mcpJsonEditor" rows="15" class="json-editor" spellcheck="false"></textarea>
+            <div class="form-actions">
+              <button class="btn-secondary" id="cancelJsonEdit">Cancel</button>
+              <button class="btn-primary" id="saveJsonEdit">Save Configuration</button>
+            </div>
           </div>
         </div>
 

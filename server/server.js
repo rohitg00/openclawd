@@ -553,6 +553,37 @@ app.delete('/api/mcp/servers/:serverId', (req, res) => {
   res.json(result);
 });
 
+app.get('/api/mcp/config', (_req, res) => {
+  const configPath = path.join(__dirname, 'mcp-servers.json');
+  try {
+    if (existsSync(configPath)) {
+      const content = readFileSync(configPath, 'utf-8');
+      res.json({ config: JSON.parse(content) });
+    } else {
+      res.json({ config: {} });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to read config: ' + err.message });
+  }
+});
+
+app.put('/api/mcp/config', (req, res) => {
+  const { config } = req.body;
+  const configPath = path.join(__dirname, 'mcp-servers.json');
+
+  if (!config || typeof config !== 'object') {
+    return res.status(400).json({ error: 'config object is required' });
+  }
+
+  try {
+    writeFileSync(configPath, JSON.stringify(config, null, 2));
+    mcpServers = loadMcpServers();
+    res.json({ success: true, message: 'Configuration saved' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to save config: ' + err.message });
+  }
+});
+
 app.get('/api/health', async (_req, res) => {
   const llmProviders = await getLlmProviders();
   const summary = getUsageSummary();

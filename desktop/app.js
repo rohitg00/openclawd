@@ -1,3 +1,6 @@
+// API Configuration
+const API_BASE = 'http://localhost:3001';
+
 // DOM Elements - Views
 const homeView = document.getElementById('homeView');
 const chatView = document.getElementById('chatView');
@@ -2044,6 +2047,173 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.classList.add('active');
     loadCatalog(category);
   });
+});
+
+// MCP Add Server Form
+const addServerForm = document.getElementById('addServerForm');
+const addServerBtn = document.getElementById('addServerBtn');
+const closeAddServerFormBtn = document.getElementById('closeAddServerForm');
+const cancelAddServerBtn = document.getElementById('cancelAddServer');
+const saveNewServerBtn = document.getElementById('saveNewServer');
+const serverTypeSelect = document.getElementById('serverType');
+const stdioFields = document.getElementById('stdioFields');
+const httpFields = document.getElementById('httpFields');
+
+addServerBtn?.addEventListener('click', () => {
+  addServerForm?.classList.remove('hidden');
+});
+
+closeAddServerFormBtn?.addEventListener('click', () => {
+  addServerForm?.classList.add('hidden');
+});
+
+cancelAddServerBtn?.addEventListener('click', () => {
+  addServerForm?.classList.add('hidden');
+});
+
+serverTypeSelect?.addEventListener('change', () => {
+  if (serverTypeSelect.value === 'stdio') {
+    stdioFields?.classList.remove('hidden');
+    httpFields?.classList.add('hidden');
+  } else {
+    stdioFields?.classList.add('hidden');
+    httpFields?.classList.remove('hidden');
+  }
+});
+
+saveNewServerBtn?.addEventListener('click', async () => {
+  const serverId = document.getElementById('serverName')?.value?.trim();
+  const type = serverTypeSelect?.value;
+  const command = document.getElementById('serverCommand')?.value?.trim();
+  const argsText = document.getElementById('serverArgs')?.value || '';
+  const urlVal = document.getElementById('serverUrl')?.value?.trim();
+  const envText = document.getElementById('serverEnv')?.value || '';
+
+  if (!serverId) {
+    alert('Server name is required');
+    return;
+  }
+
+  const body = { serverId, type, enabled: true };
+
+  if (type === 'stdio') {
+    if (!command) {
+      alert('Command is required for stdio servers');
+      return;
+    }
+    body.command = command;
+    body.args = argsText.split('\n').map(s => s.trim()).filter(Boolean);
+  } else {
+    if (!urlVal) {
+      alert('URL is required for http servers');
+      return;
+    }
+    body.url = urlVal;
+  }
+
+  if (envText.trim()) {
+    body.env = {};
+    envText.split('\n').forEach(line => {
+      const [key, ...rest] = line.split('=');
+      if (key && rest.length > 0) {
+        body.env[key.trim()] = rest.join('=').trim();
+      }
+    });
+  }
+
+  saveNewServerBtn.textContent = 'Adding...';
+  saveNewServerBtn.disabled = true;
+
+  try {
+    const response = await fetch(`${API_BASE}/api/mcp/servers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (response.ok) {
+      addServerForm?.classList.add('hidden');
+      document.getElementById('serverName').value = '';
+      document.getElementById('serverCommand').value = '';
+      document.getElementById('serverArgs').value = '';
+      document.getElementById('serverUrl').value = '';
+      document.getElementById('serverEnv').value = '';
+      loadMcpServers();
+    } else {
+      const data = await response.json();
+      alert(data.error || 'Failed to add server');
+    }
+  } catch (err) {
+    console.error('Failed to add server:', err);
+    alert('Failed to add server');
+  }
+
+  saveNewServerBtn.textContent = 'Add Server';
+  saveNewServerBtn.disabled = false;
+});
+
+// JSON Editor
+const jsonEditorSection = document.getElementById('jsonEditorSection');
+const viewJsonBtn = document.getElementById('viewJsonBtn');
+const closeJsonEditorBtn = document.getElementById('closeJsonEditor');
+const cancelJsonEditBtn = document.getElementById('cancelJsonEdit');
+const saveJsonEditBtn = document.getElementById('saveJsonEdit');
+const mcpJsonEditor = document.getElementById('mcpJsonEditor');
+
+viewJsonBtn?.addEventListener('click', async () => {
+  try {
+    const response = await fetch(`${API_BASE}/api/mcp/config`);
+    const data = await response.json();
+    mcpJsonEditor.value = JSON.stringify(data.config || {}, null, 2);
+    jsonEditorSection?.classList.remove('hidden');
+  } catch (err) {
+    console.error('Failed to load MCP config:', err);
+    mcpJsonEditor.value = '{\n  \n}';
+    jsonEditorSection?.classList.remove('hidden');
+  }
+});
+
+closeJsonEditorBtn?.addEventListener('click', () => {
+  jsonEditorSection?.classList.add('hidden');
+});
+
+cancelJsonEditBtn?.addEventListener('click', () => {
+  jsonEditorSection?.classList.add('hidden');
+});
+
+saveJsonEditBtn?.addEventListener('click', async () => {
+  let config;
+  try {
+    config = JSON.parse(mcpJsonEditor.value);
+  } catch (err) {
+    alert('Invalid JSON: ' + err.message);
+    return;
+  }
+
+  saveJsonEditBtn.textContent = 'Saving...';
+  saveJsonEditBtn.disabled = true;
+
+  try {
+    const response = await fetch(`${API_BASE}/api/mcp/config`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ config })
+    });
+
+    if (response.ok) {
+      jsonEditorSection?.classList.add('hidden');
+      loadMcpServers();
+    } else {
+      const data = await response.json();
+      alert(data.error || 'Failed to save config');
+    }
+  } catch (err) {
+    console.error('Failed to save config:', err);
+    alert('Failed to save config');
+  }
+
+  saveJsonEditBtn.textContent = 'Save Configuration';
+  saveJsonEditBtn.disabled = false;
 });
 
 saveSettingsBtn?.addEventListener('click', async () => {
