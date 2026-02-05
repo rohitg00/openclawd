@@ -50,7 +50,6 @@ win:
     - target: nsis
       arch:
         - x64
-        - arm64
   icon: build/icon.png
 
 nsis:
@@ -63,12 +62,10 @@ linux:
     - target: AppImage
       arch:
         - x64
-        - arm64
     - target: deb
       arch:
         - x64
-        - arm64
-  icon: build/icons
+  icon: build/icons/png
   category: Development
   maintainer: ghumare64@gmail.com
 
