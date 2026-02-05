@@ -1,0 +1,80 @@
+appId: com.openclawd.desktop
+productName: OpenClawd
+copyright: Copyright © 2025 Rohit Ghumare
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - main.js
+  - preload.js
+  - "desktop/**/*"
+  - package.json
+
+extraResources:
+  - from: server/
+    to: server/
+    filter:
+      - "**/*"
+      - "!**/.env"
+      - "!**/.env.*"
+  - from: .env.example
+    to: .env.example
+  - from: mcp-servers.example.json
+    to: mcp-servers.example.json
+
+asar: true
+
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch:
+        - universal
+    - target: zip
+      arch:
+        - universal
+  icon: build/icon.png
+  darkModeSupport: true
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  identity: null
+
+dmg:
+  artifactName: "${productName}-${version}-mac.${ext}"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - arm64
+  icon: build/icon.png
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: "${productName}-${version}-win-${arch}.${ext}"
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
+    - target: deb
+      arch:
+        - x64
+        - arm64
+  icon: build/icons
+  category: Development
+  maintainer: ghumare64@gmail.com
+
+publish:
+  provider: github
+  owner: rohitg00
+  repo: openclawd
+  releaseType: draft

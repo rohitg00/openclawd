@@ -5,6 +5,13 @@
   "scripts": {
     "dev": "NODE_ENV=development electron .",
     "start": "electron .",
+    "postinstall": "cd server && npm install",
+    "build": "electron-builder",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux",
+    "build:all": "electron-builder -mwl",
+    "icons": "electron-icon-builder --input=build/icon.png --output=build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Rohit Ghumare",
@@ -26,6 +33,8 @@
   },
   "devDependencies": {
     "electron": "^39.5.1",
+    "electron-builder": "^26.0.12",
+    "electron-icon-builder": "^2.0.1",
     "electron-reload": "^2.0.0-alpha.1"
   }
 }

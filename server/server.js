@@ -52,7 +52,10 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.join(__dirname, '..', '.env') });
+const configDir = process.env.OPENCLAWD_USER_DATA || __dirname;
+const envFilePath = process.env.OPENCLAWD_ENV_PATH || path.join(__dirname, '..', '.env');
+
+dotenv.config({ path: envFilePath });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -80,7 +83,7 @@ async function initializeLlmProviders() {
     console.log(`[LLM] Discovered ${veniceModels.length} Venice model(s)`);
   }
 
-  loadUsageHistory(__dirname);
+  loadUsageHistory(configDir);
 }
 
 app.use(cors());
@@ -172,7 +175,7 @@ app.post('/api/chat', async (req, res) => {
 
     if (inputTokens > 0 || outputTokens > 0) {
       trackUsage(llmProvider, modelId, inputTokens, outputTokens);
-      saveUsageHistory(__dirname);
+      saveUsageHistory(configDir);
     }
 
     clearInterval(heartbeatInterval);
@@ -279,7 +282,7 @@ app.get('/api/llm/usage', (_req, res) => {
 
 app.get('/api/auth/profiles', (_req, res) => {
   try {
-    const store = loadAuthProfiles(__dirname);
+    const store = loadAuthProfiles(configDir);
     const profiles = Object.keys(store.profiles).map(id => ({
       id,
       ...getProfileStats(store, id)
@@ -305,7 +308,7 @@ app.post('/api/auth/profiles', (req, res) => {
   }
 
   try {
-    const store = loadAuthProfiles(__dirname);
+    const store = loadAuthProfiles(configDir);
     const credential = { type: type || 'api_key' };
 
     if (key) credential.key = key;
@@ -313,7 +316,7 @@ app.post('/api/auth/profiles', (req, res) => {
     if (access) credential.access = access;
 
     addProfile(store, profileId, credential);
-    saveAuthProfiles(__dirname, store);
+    saveAuthProfiles(configDir, store);
 
     res.json({ success: true, profileId });
   } catch (error) {
@@ -325,9 +328,9 @@ app.delete('/api/auth/profiles/:profileId', (req, res) => {
   const { profileId } = req.params;
 
   try {
-    const store = loadAuthProfiles(__dirname);
+    const store = loadAuthProfiles(configDir);
     removeProfile(store, profileId);
-    saveAuthProfiles(__dirname, store);
+    saveAuthProfiles(configDir, store);
 
     res.json({ success: true, profileId });
   } catch (error) {
@@ -554,7 +557,7 @@ app.delete('/api/mcp/servers/:serverId', (req, res) => {
 });
 
 app.get('/api/mcp/config', (_req, res) => {
-  const configPath = path.join(__dirname, 'mcp-servers.json');
+  const configPath = process.env.OPENCLAWD_MCP_CONFIG_PATH || path.join(__dirname, 'mcp-servers.json');
   try {
     if (existsSync(configPath)) {
       const content = readFileSync(configPath, 'utf-8');
@@ -569,7 +572,7 @@ app.get('/api/mcp/config', (_req, res) => {
 
 app.put('/api/mcp/config', (req, res) => {
   const { config } = req.body;
-  const configPath = path.join(__dirname, 'mcp-servers.json');
+  const configPath = process.env.OPENCLAWD_MCP_CONFIG_PATH || path.join(__dirname, 'mcp-servers.json');
 
   if (!config || typeof config !== 'object') {
     return res.status(400).json({ error: 'config object is required' });
@@ -600,7 +603,7 @@ app.get('/api/health', async (_req, res) => {
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 
-const ENV_PATH = path.join(__dirname, '..', '.env');
+const ENV_PATH = process.env.OPENCLAWD_ENV_PATH || path.join(__dirname, '..', '.env');
 
 function loadEnvFile() {
   if (!existsSync(ENV_PATH)) return {};
@@ -733,7 +736,7 @@ server.on('error', (err) => {
 
 process.on('SIGINT', () => {
   console.log('\nShutting down server...');
-  saveUsageHistory(__dirname);
+  saveUsageHistory(configDir);
   server.close(() => {
     console.log('Server closed');
     process.exit(0);
