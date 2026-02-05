@@ -53,7 +53,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const configDir = process.env.OPENCLAWD_USER_DATA || __dirname;
-const envFilePath = process.env.OPENCLAWD_ENV_PATH || path.join(__dirname, '..', '.env');
+const envFilePath = process.env.OPENCLAWD_envFilePath || path.join(__dirname, '..', '.env');
 
 dotenv.config({ path: envFilePath });
 
@@ -603,11 +603,9 @@ app.get('/api/health', async (_req, res) => {
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 
-const ENV_PATH = process.env.OPENCLAWD_ENV_PATH || path.join(__dirname, '..', '.env');
-
 function loadEnvFile() {
-  if (!existsSync(ENV_PATH)) return {};
-  const content = readFileSync(ENV_PATH, 'utf-8');
+  if (!existsSync(envFilePath)) return {};
+  const content = readFileSync(envFilePath, 'utf-8');
   const env = {};
   for (const line of content.split('\n')) {
     const trimmed = line.trim();
@@ -630,7 +628,7 @@ function saveEnvFile(env) {
   for (const [key, value] of Object.entries(env)) {
     if (value) lines.push(`${key}=${value}`);
   }
-  writeFileSync(ENV_PATH, lines.join('\n') + '\n');
+  writeFileSync(envFilePath, lines.join('\n') + '\n');
 }
 
 app.get('/api/settings', (_req, res) => {

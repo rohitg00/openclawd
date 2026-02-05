@@ -1,7 +1,8 @@
-const { app, BrowserWindow, shell } = require('electron');
+const { app, BrowserWindow, shell, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
+const http = require('http');
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -20,6 +21,7 @@ let mainWindow;
 let serverProcess = null;
 let isShuttingDown = false;
 
+const SERVER_PORT = 3456;
 const userDataPath = app.getPath('userData');
 
 function getServerDir() {
@@ -64,6 +66,39 @@ function ensureConfigFiles() {
   }
 }
 
+function waitForServer(port, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+
+    function probe() {
+      const req = http.get(`http://127.0.0.1:${port}/api/health`, (res) => {
+        if (res.statusCode >= 200 && res.statusCode < 400) {
+          resolve();
+        } else {
+          retry();
+        }
+        res.resume();
+      });
+
+      req.on('error', retry);
+      req.setTimeout(2000, () => {
+        req.destroy();
+        retry();
+      });
+    }
+
+    function retry() {
+      if (Date.now() - start >= timeoutMs) {
+        reject(new Error(`Server did not respond on port ${port} within ${timeoutMs}ms`));
+        return;
+      }
+      setTimeout(probe, 500);
+    }
+
+    probe();
+  });
+}
+
 function startServer() {
   return new Promise((resolve, reject) => {
     const serverDir = getServerDir();
@@ -84,30 +119,18 @@ function startServer() {
       OPENCLAWD_MCP_CONFIG_PATH: mcpPath
     };
 
-    serverProcess = spawn('node', [serverEntry], {
+    const execArgs = isDev
+      ? ['node', [serverEntry]]
+      : [process.execPath, ['--no-warnings', serverEntry]];
+
+    serverProcess = spawn(execArgs[0], execArgs[1], {
       cwd: serverDir,
       env: serverEnv,
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
-    let resolved = false;
-
-    const timeout = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        console.warn('[Server] Startup timeout -- showing window anyway');
-        resolve();
-      }
-    }, 10000);
-
     serverProcess.stdout.on('data', (data) => {
-      const output = data.toString();
-      process.stdout.write(`[Server] ${output}`);
-      if (!resolved && output.includes('Backend server running')) {
-        resolved = true;
-        clearTimeout(timeout);
-        resolve();
-      }
+      process.stdout.write(`[Server] ${data}`);
     });
 
     serverProcess.stderr.on('data', (data) => {
@@ -116,17 +139,15 @@ function startServer() {
 
     serverProcess.on('error', (err) => {
       console.error('[Server] Failed to start:', err);
-      if (!resolved) {
-        resolved = true;
-        clearTimeout(timeout);
-        reject(err);
-      }
+      reject(err);
     });
 
     serverProcess.on('exit', (code, signal) => {
       console.log(`[Server] Exited with code=${code} signal=${signal}`);
       serverProcess = null;
     });
+
+    waitForServer(SERVER_PORT, 15000).then(resolve).catch(reject);
   });
 }
 
@@ -183,19 +204,36 @@ function createWindow() {
   });
 }
 
-app.on('ready', async () => {
-  console.log('Electron app ready');
+async function launchWithRetry() {
   ensureConfigFiles();
 
-  try {
-    await startServer();
-    console.log('[Server] Backend started successfully');
-  } catch (err) {
-    console.error('[Server] Failed to start backend:', err.message);
+  while (true) {
+    try {
+      await startServer();
+      console.log('[Server] Backend started successfully');
+      createWindow();
+      return;
+    } catch (err) {
+      console.error('[Server] Failed to start backend:', err.message);
+      const { response } = await dialog.showMessageBox({
+        type: 'error',
+        title: 'OpenClawd - Server Error',
+        message: 'Failed to start the backend server.',
+        detail: err.message,
+        buttons: ['Retry', 'Exit'],
+        defaultId: 0,
+        cancelId: 1
+      });
+      if (response === 1) {
+        app.quit();
+        return;
+      }
+      await stopServer();
+    }
   }
+}
 
-  createWindow();
-});
+app.on('ready', launchWithRetry);
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

@@ -1,6 +1,6 @@
 appId: com.openclawd.desktop
 productName: OpenClawd
-copyright: Copyright © 2025 Rohit Ghumare
+copyright: Copyright © 2026 Rohit Ghumare
 
 directories:
   output: dist
@@ -41,7 +41,6 @@ mac:
   gatekeeperAssess: false
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  identity: null
 
 dmg:
   artifactName: "${productName}-${version}-mac.${ext}"
