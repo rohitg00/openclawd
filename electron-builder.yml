@@ -31,10 +31,12 @@ mac:
   target:
     - target: dmg
       arch:
-        - universal
+        - x64
+        - arm64
     - target: zip
       arch:
-        - universal
+        - x64
+        - arm64
   icon: build/icon.png
   darkModeSupport: true
   hardenedRuntime: true
@@ -43,7 +45,7 @@ mac:
   entitlementsInherit: build/entitlements.mac.plist
 
 dmg:
-  artifactName: "${productName}-${version}-mac.${ext}"
+  artifactName: "${productName}-${version}-mac-${arch}.${ext}"
 
 win:
   target:
