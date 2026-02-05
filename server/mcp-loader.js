@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DEFAULT_CONFIG_PATH = path.join(__dirname, 'mcp-servers.json');
+const DEFAULT_CONFIG_PATH = process.env.OPENCLAWD_MCP_CONFIG_PATH || path.join(__dirname, 'mcp-servers.json');
 
 export function loadMcpServers(configPath = DEFAULT_CONFIG_PATH) {
   const filePath = configPath;

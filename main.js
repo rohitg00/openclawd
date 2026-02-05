@@ -1,11 +1,13 @@
-const { app, BrowserWindow, shell } = require('electron');
+const { app, BrowserWindow, shell, dialog } = require('electron');
 const path = require('path');
+const { spawn } = require('child_process');
+const fs = require('fs');
+const http = require('http');
 
 const isDev = process.env.NODE_ENV === 'development';
 
 if (isDev) {
   try {
-    // Enable live-reload for the main and renderer processes during development
     require('electron-reload')(__dirname, {
       electron: path.join(__dirname, 'node_modules', '.bin', 'electron'),
       ignored: /server|node_modules/
@@ -15,10 +17,161 @@ if (isDev) {
   }
 }
 
-// Global window reference
 let mainWindow;
+let serverProcess = null;
+let isShuttingDown = false;
 
-// Create Electron window
+const SERVER_PORT = 3456;
+const userDataPath = app.getPath('userData');
+
+function getServerDir() {
+  if (isDev) {
+    return path.join(__dirname, 'server');
+  }
+  return path.join(process.resourcesPath, 'server');
+}
+
+function getEnvExamplePath() {
+  if (isDev) {
+    return path.join(__dirname, '.env.example');
+  }
+  return path.join(process.resourcesPath, '.env.example');
+}
+
+function getMcpExamplePath() {
+  if (isDev) {
+    return path.join(__dirname, 'mcp-servers.example.json');
+  }
+  return path.join(process.resourcesPath, 'mcp-servers.example.json');
+}
+
+function ensureConfigFiles() {
+  const envPath = path.join(userDataPath, '.env');
+  const mcpPath = path.join(userDataPath, 'mcp-servers.json');
+
+  if (!fs.existsSync(envPath)) {
+    const exampleEnv = getEnvExamplePath();
+    if (fs.existsSync(exampleEnv)) {
+      fs.copyFileSync(exampleEnv, envPath);
+      console.log('[Config] Created .env from example at', envPath);
+    }
+  }
+
+  if (!fs.existsSync(mcpPath)) {
+    const exampleMcp = getMcpExamplePath();
+    if (fs.existsSync(exampleMcp)) {
+      fs.copyFileSync(exampleMcp, mcpPath);
+      console.log('[Config] Created mcp-servers.json from example at', mcpPath);
+    }
+  }
+}
+
+function waitForServer(port, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const start = Date.now();
+
+    function probe() {
+      const req = http.get(`http://127.0.0.1:${port}/api/health`, (res) => {
+        if (res.statusCode >= 200 && res.statusCode < 400) {
+          resolve();
+        } else {
+          retry();
+        }
+        res.resume();
+      });
+
+      req.on('error', retry);
+      req.setTimeout(2000, () => {
+        req.destroy();
+        retry();
+      });
+    }
+
+    function retry() {
+      if (Date.now() - start >= timeoutMs) {
+        reject(new Error(`Server did not respond on port ${port} within ${timeoutMs}ms`));
+        return;
+      }
+      setTimeout(probe, 500);
+    }
+
+    probe();
+  });
+}
+
+function startServer() {
+  return new Promise((resolve, reject) => {
+    const serverDir = getServerDir();
+    const serverEntry = path.join(serverDir, 'server.js');
+
+    if (!fs.existsSync(serverEntry)) {
+      reject(new Error(`Server not found at ${serverEntry}`));
+      return;
+    }
+
+    const envPath = path.join(userDataPath, '.env');
+    const mcpPath = path.join(userDataPath, 'mcp-servers.json');
+
+    const serverEnv = {
+      ...process.env,
+      OPENCLAWD_USER_DATA: userDataPath,
+      OPENCLAWD_ENV_PATH: envPath,
+      OPENCLAWD_MCP_CONFIG_PATH: mcpPath
+    };
+
+    const execArgs = isDev
+      ? ['node', [serverEntry]]
+      : [process.execPath, ['--no-warnings', serverEntry]];
+
+    serverProcess = spawn(execArgs[0], execArgs[1], {
+      cwd: serverDir,
+      env: serverEnv,
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+
+    serverProcess.stdout.on('data', (data) => {
+      process.stdout.write(`[Server] ${data}`);
+    });
+
+    serverProcess.stderr.on('data', (data) => {
+      process.stderr.write(`[Server:err] ${data}`);
+    });
+
+    serverProcess.on('error', (err) => {
+      console.error('[Server] Failed to start:', err);
+      reject(err);
+    });
+
+    serverProcess.on('exit', (code, signal) => {
+      console.log(`[Server] Exited with code=${code} signal=${signal}`);
+      serverProcess = null;
+    });
+
+    waitForServer(SERVER_PORT, 15000).then(resolve).catch(reject);
+  });
+}
+
+function stopServer() {
+  if (!serverProcess) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    const forceTimeout = setTimeout(() => {
+      if (serverProcess) {
+        console.warn('[Server] Force killing after timeout');
+        serverProcess.kill('SIGKILL');
+      }
+      resolve();
+    }, 5000);
+
+    serverProcess.once('exit', () => {
+      clearTimeout(forceTimeout);
+      resolve();
+    });
+
+    serverProcess.kill('SIGTERM');
+  });
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -32,11 +185,7 @@ function createWindow() {
     }
   });
 
-  // Load the app
   mainWindow.loadFile(path.join(__dirname, 'desktop', 'index.html'));
-
-  // Open DevTools in development (comment out for production)
-  // mainWindow.webContents.openDevTools();
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -48,7 +197,6 @@ function createWindow() {
   });
 
   mainWindow.webContents.on('will-navigate', (event, url) => {
-    // If navigating away from our app, open in external browser
     if (!url.startsWith('file://')) {
       event.preventDefault();
       shell.openExternal(url);
@@ -56,22 +204,61 @@ function createWindow() {
   });
 }
 
-// App lifecycle
-app.on('ready', () => {
-  console.log('Electron app ready');
-  createWindow();
-});
+async function launchWithRetry() {
+  ensureConfigFiles();
+
+  while (true) {
+    try {
+      await startServer();
+      console.log('[Server] Backend started successfully');
+      createWindow();
+      return;
+    } catch (err) {
+      console.error('[Server] Failed to start backend:', err.message);
+      const { response } = await dialog.showMessageBox({
+        type: 'error',
+        title: 'OpenClawd - Server Error',
+        message: 'Failed to start the backend server.',
+        detail: err.message,
+        buttons: ['Retry', 'Exit'],
+        defaultId: 0,
+        cancelId: 1
+      });
+      if (response === 1) {
+        app.quit();
+        return;
+      }
+      await stopServer();
+    }
+  }
+}
+
+app.on('ready', launchWithRetry);
 
 app.on('window-all-closed', () => {
-  // On macOS, apps stay active until user explicitly quits
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
 
 app.on('activate', () => {
-  // On macOS, re-create window when dock icon is clicked
   if (mainWindow === null) {
     createWindow();
+  }
+});
+
+app.on('before-quit', async (event) => {
+  if (serverProcess && !isShuttingDown) {
+    isShuttingDown = true;
+    event.preventDefault();
+    await stopServer();
+    app.quit();
+  }
+});
+
+app.on('will-quit', () => {
+  if (serverProcess && !isShuttingDown) {
+    serverProcess.kill('SIGKILL');
+    serverProcess = null;
   }
 });
