@@ -41,7 +41,7 @@ class Gateway {
     }
 
     if (config.browser?.enabled) {
-      console.log('[Browser] Mode:', config.browser.mode || 'clawd')
+      console.log('[Browser] Mode:', config.browser.mode || 'managed')
 
       try {
         this.browserServer = new BrowserServer(config.browser)
@@ -121,10 +121,10 @@ class Gateway {
 
   async start() {
     console.log('='.repeat(50))
-    console.log('Clawd Gateway Starting')
+    console.log('OpenClawd Gateway Starting')
     console.log('='.repeat(50))
     console.log(`Agent ID: ${config.agentId}`)
-    console.log(`Workspace: ~/clawd/`)
+    console.log(`Workspace: ~/openclawd/`)
     console.log('')
 
     await this.initMcpServers()

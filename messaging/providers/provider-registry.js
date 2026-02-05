@@ -1,5 +1,5 @@
 /**
- * Provider Registry for Clawd - Minimal version for provider discovery
+ * Provider Registry for OpenClawd - Minimal version for provider discovery
  * Full implementation in server/providers/provider-registry.js
  */
 

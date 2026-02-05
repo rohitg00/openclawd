@@ -92,7 +92,7 @@ async function mainMenu() {
 }
 
 async function startGateway() {
-  print('\n Starting Clawd Gateway...\n', colors.green)
+  print('\n Starting OpenClawd Gateway...\n', colors.green)
   rl.close()
 
   await import('./gateway.js')
@@ -149,14 +149,14 @@ async function terminalChat() {
       try {
         execSync('afplay /System/Library/Sounds/Glass.aiff &', { stdio: 'ignore' })
         const escapedMsg = message.replace(/"/g, '\\"').replace(/'/g, "'\"'\"'")
-        execSync(`osascript -e 'display notification "${escapedMsg}" with title "Clawd" sound name "Glass"'`, { stdio: 'ignore' })
+        execSync(`osascript -e 'display notification "${escapedMsg}" with title "OpenClawd" sound name "Glass"'`, { stdio: 'ignore' })
       } catch (e) {
         process.stdout.write('\x07')
       }
 
       if (invokeAgent) {
         try {
-          process.stdout.write(colors.cyan + '\n Clawd: ' + colors.reset)
+          process.stdout.write(colors.cyan + '\n OpenClawd: ' + colors.reset)
           for await (const chunk of agent.run({
             message,
             sessionKey,
@@ -218,7 +218,7 @@ async function terminalChat() {
               if (lastWasToolUse) {
                 process.stdout.write('\n')
               }
-              process.stdout.write(colors.cyan + '\n Clawd: ' + colors.reset)
+              process.stdout.write(colors.cyan + '\n OpenClawd: ' + colors.reset)
               isFirstText = false
               lastWasToolUse = false
             }
@@ -505,7 +505,7 @@ async function browserSetup() {
   print('━'.repeat(40), colors.dim)
   print('')
   print('Select browser mode:\n')
-  print('  1) clawd - Managed browser (isolated profile)', colors.green)
+  print('  1) managed - Managed browser (isolated profile)', colors.green)
   print('     A dedicated Chromium instance with its own profile')
   print('     Best for: Clean slate, no existing logins\n')
   print('  2) chrome - Control your Chrome (keeps logins)', colors.blue)
@@ -518,7 +518,7 @@ async function browserSetup() {
 
   switch (choice.trim()) {
     case '1':
-      await setupClawdBrowser()
+      await setupManagedBrowser()
       break
     case '2':
       await setupChromeBrowser()
@@ -540,8 +540,8 @@ async function browserSetup() {
   await mainMenu()
 }
 
-async function setupClawdBrowser() {
-  print('\n Clawd Browser Setup\n', colors.green)
+async function setupManagedBrowser() {
+  print('\n Managed Browser Setup\n', colors.green)
   print('This launches an isolated Chromium browser with a dedicated profile.')
   print('Your browsing data will be stored separately from your main browser.\n')
 
@@ -565,7 +565,7 @@ async function setupClawdBrowser() {
         return
       }
     } else {
-      print('\n⚠ Browser setup cancelled. Chromium is required for clawd mode.', colors.yellow)
+      print('\n⚠ Browser setup cancelled. Chromium is required for managed mode.', colors.yellow)
       print('   Install with: npx playwright install chromium\n', colors.cyan)
       return
     }
@@ -573,19 +573,19 @@ async function setupClawdBrowser() {
     print('  ✓ Chromium found\n', colors.green)
   }
 
-  const customPath = await prompt('Custom profile path (press Enter for default ~/.clawd-browser-profile): ')
+  const customPath = await prompt('Custom profile path (press Enter for default ~/.openclawd-browser): ')
   const headlessChoice = await prompt('Run headless (no visible window)? (y/n, default: n): ')
 
-  const userDataDir = customPath.trim() || '~/.clawd-browser-profile'
+  const userDataDir = customPath.trim() || '~/.openclawd-browser'
   const headless = headlessChoice.toLowerCase() === 'y'
 
   await updateBrowserConfig({
     enabled: true,
-    mode: 'clawd',
-    clawd: { userDataDir, headless }
+    mode: 'managed',
+    managed: { userDataDir, headless }
   })
 
-  print('\n✓ Browser configured: clawd mode', colors.green)
+  print('\n✓ Browser configured: managed mode', colors.green)
   print(`   Profile: ${userDataDir}`, colors.dim)
   print(`   Headless: ${headless}\n`, colors.dim)
 }
@@ -647,10 +647,10 @@ async function updateBrowserConfig(updates) {
 
     const newBrowserBlock = `browser: {
     enabled: ${updates.enabled},
-    mode: '${escapeQuotes(updates.mode) || 'clawd'}',
-    clawd: {
-      userDataDir: '${escapeQuotes(updates.clawd?.userDataDir) || '~/.clawd-browser-profile'}',
-      headless: ${updates.clawd?.headless ?? false}
+    mode: '${escapeQuotes(updates.mode) || 'managed'}',
+    managed: {
+      userDataDir: '${escapeQuotes(updates.managed?.userDataDir) || '~/.openclawd-browser'}',
+      headless: ${updates.managed?.headless ?? false}
     },
     chrome: {
       profilePath: '${escapeQuotes(updates.chrome?.profilePath) || ''}',
@@ -769,7 +769,7 @@ if (args.length === 0) {
       break
 
     case 'start':
-      print('\n Starting Clawd Gateway...\n', colors.green)
+      print('\n Starting OpenClawd Gateway...\n', colors.green)
       import('./gateway.js')
       break
 
@@ -789,9 +789,9 @@ if (args.length === 0) {
     case '--help':
     case '-h':
       printHeader()
-      print('Usage: clawd [command]\n', colors.bold)
+      print('Usage: oclawd [command]\n', colors.bold)
       print('Commands:')
-      print('  chat   Terminal chat with Clawd', colors.red)
+      print('  chat   Terminal chat with OpenClawd', colors.red)
       print('  start    Start the gateway')
       print('  setup    Interactive setup wizard')
       print('  config   Show current configuration')
@@ -804,7 +804,7 @@ if (args.length === 0) {
 
     default:
       print(`Unknown command: ${command}`, colors.red)
-      print('Run "clawd help" for usage.')
+      print('Run "oclawd help" for usage.')
       rl.close()
       process.exit(1)
   }

@@ -72,12 +72,12 @@ curl localhost:3001/api/llm/providers
 curl localhost:3001/api/mcp/catalog
 ```
 
-## Clawd Bot
+## Messaging Bot
 
 AI on WhatsApp, Telegram, Signal, iMessage:
 
 ```bash
-cd clawd && npm install && node cli.js
+cd messaging && npm install && node cli.js
 ```
 
 ## License

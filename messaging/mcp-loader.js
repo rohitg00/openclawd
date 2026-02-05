@@ -1,5 +1,5 @@
 /**
- * MCP Server Configuration Loader for Clawd
+ * MCP Server Configuration Loader for OpenClawd
  * Loads MCP servers from mcp-servers.json with environment variable substitution
  */
 

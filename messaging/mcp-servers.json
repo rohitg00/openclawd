@@ -1,5 +1,5 @@
 {
-  "_comment": "MCP Server Configuration for Clawd. Use ${VAR} for environment variables.",
+  "_comment": "MCP Server Configuration for OpenClawd. Use ${VAR} for environment variables.",
 
   "github": {
     "type": "stdio",

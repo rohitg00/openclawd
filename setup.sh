@@ -34,7 +34,7 @@ echo ""
 echo "Installing dependencies..."
 npm install
 cd server && npm install && cd ..
-cd clawd && npm install && cd ..
+cd messaging && npm install && cd ..
 echo ""
 
 echo "========================"
@@ -49,8 +49,8 @@ echo "  2. (Optional) Configure MCP servers in server/mcp-servers.json"
 echo "  3. Start backend: cd server && npm start"
 echo "  4. Start app: npm start (in another terminal)"
 echo ""
-echo "For Clawd (messaging bot):"
-echo "  cd clawd && node cli.js"
+echo "For messaging bot (WhatsApp/Telegram/Signal):"
+echo "  cd messaging && node cli.js"
 echo ""
 echo "API Endpoints:"
 echo "  GET  /api/llm/providers  - List LLM providers"

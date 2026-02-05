@@ -5,7 +5,7 @@ import path from 'path'
 import os from 'os'
 import { EventEmitter } from 'events'
 
-const JOBS_FILE = path.join(os.homedir(), '.clawd', 'cron-jobs.json')
+const JOBS_FILE = path.join(os.homedir(), '.openclawd', 'cron-jobs.json')
 
 /**
  * Cron scheduler state management

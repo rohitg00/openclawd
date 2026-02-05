@@ -7,12 +7,12 @@ import { homedir } from 'os'
 /**
  * BrowserServer - Core browser automation server
  * Supports two modes:
- * - 'clawd': Managed isolated browser with dedicated profile
+ * - 'managed': Managed isolated browser with dedicated profile
  * - 'chrome': CDP connection to existing Chrome instance
  */
 export default class BrowserServer {
   constructor(config = {}) {
-    this.mode = config.mode || 'clawd'
+    this.mode = config.mode || 'managed'
     this.config = config
     this.browser = null
     this.context = null
@@ -27,8 +27,8 @@ export default class BrowserServer {
    * Start the browser based on mode
    */
   async start() {
-    if (this.mode === 'clawd') {
-      await this.startClawdBrowser()
+    if (this.mode === 'managed') {
+      await this.startManagedBrowser()
     } else if (this.mode === 'chrome') {
       await this.connectToChrome()
     }
@@ -38,20 +38,20 @@ export default class BrowserServer {
   /**
    * Launch isolated Chromium with dedicated profile
    */
-  async startClawdBrowser() {
-    const clawdConfig = this.config.clawd || {}
-    let userDataDir = clawdConfig.userDataDir || '~/.clawd-browser-profile'
+  async startManagedBrowser() {
+    const managedConfig = this.config.managed || {}
+    let userDataDir = managedConfig.userDataDir || '~/.openclawd-browser'
 
     // Expand ~ to home directory
     if (userDataDir.startsWith('~')) {
       userDataDir = join(homedir(), userDataDir.slice(1))
     }
 
-    console.log('[BrowserServer] Launching clawd browser with profile:', userDataDir)
+    console.log('[BrowserServer] Launching managed browser with profile:', userDataDir)
 
     try {
       this.context = await chromium.launchPersistentContext(userDataDir, {
-        headless: clawdConfig.headless ?? false,
+        headless: managedConfig.headless ?? false,
         viewport: { width: 1280, height: 720 },
         args: [
           '--disable-blink-features=AutomationControlled',
@@ -70,7 +70,7 @@ export default class BrowserServer {
     const pages = this.context.pages()
     this.page = pages.length > 0 ? pages[0] : await this.context.newPage()
 
-    console.log('[BrowserServer] Clawd browser started')
+    console.log('[BrowserServer] Managed browser started')
   }
 
   /**
@@ -107,7 +107,7 @@ export default class BrowserServer {
     if (this.httpServer) {
       this.httpServer.close()
     }
-    if (this.context && this.mode === 'clawd') {
+    if (this.context && this.mode === 'managed') {
       await this.context.close()
     }
     if (this.browser) {

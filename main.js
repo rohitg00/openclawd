@@ -33,7 +33,7 @@ function createWindow() {
   });
 
   // Load the app
-  mainWindow.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+  mainWindow.loadFile(path.join(__dirname, 'desktop', 'index.html'));
 
   // Open DevTools in development (comment out for production)
   // mainWindow.webContents.openDevTools();

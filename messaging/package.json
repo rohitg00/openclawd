@@ -1,11 +1,11 @@
 {
-  "name": "clawd",
+  "name": "openclawd-bot",
   "version": "1.0.0",
-  "description": "Clawd gateway - WhatsApp, Telegram, Signal, iMessage adapters with Claude agent runtime and multi-provider LLM support",
+  "description": "OpenClawd messaging gateway - WhatsApp, Telegram, Signal, iMessage adapters with multi-provider LLM support",
   "type": "module",
   "main": "gateway.js",
   "bin": {
-    "clawd": "./cli.js"
+    "oclawd": "./cli.js"
   },
   "scripts": {
     "start": "node cli.js start",

@@ -1,5 +1,5 @@
 export default {
-  agentId: 'clawd',
+  agentId: 'openclawd',
 
   whatsapp: {
     enabled: true,
@@ -34,16 +34,16 @@ export default {
 
   // Agent configuration
   agent: {
-    workspace: '~/clawd',        // Agent workspace directory
+    workspace: '~/openclawd',    // Agent workspace directory
     maxTurns: 50,                // Max tool-use turns per message
     allowedTools: ['Read', 'Write', 'Edit', 'Bash', 'Glob', 'Grep']
   },
 
   browser: {
     enabled: true,
-    mode: 'clawd',
-    clawd: {
-      userDataDir: '~/.clawd-browser-profile',
+    mode: 'managed',
+    managed: {
+      userDataDir: '~/.openclawd-browser',
       headless: false
     },
     chrome: {

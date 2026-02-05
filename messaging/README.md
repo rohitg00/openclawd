@@ -1,4 +1,4 @@
-# Clawd
+# OpenClawd Messaging
 
 A personal AI assistant that runs on your messaging platforms. Send a message on WhatsApp, Telegram, Signal, or iMessage and get responses from Claude with full tool access, persistent memory, scheduled reminders, browser automation, and integrations with 500+ apps.
 
@@ -14,7 +14,7 @@ A personal AI assistant that runs on your messaging platforms. Send a message on
   - [Signal](#signal)
   - [iMessage](#imessage)
 - [Browser Control](#browser-control)
-  - [Clawd Mode](#clawd-mode-isolated-browser)
+  - [Managed Mode](#managed-mode-isolated-browser)
   - [Chrome Mode](#chrome-mode-your-existing-browser)
 - [Memory System](#memory-system)
 - [Scheduling and Reminders](#scheduling-and-reminders)
@@ -43,7 +43,7 @@ For specific adapters:
 ## Installation
 
 ```bash
-cd clawd
+cd messaging
 npm install
 ```
 
@@ -117,7 +117,7 @@ The configuration includes:
 
 ```javascript
 {
-  agentId: 'clawd',              // Unique identifier for your assistant
+  agentId: 'openclawd',              // Unique identifier for your assistant
 
   whatsapp: { enabled: true, ... },
   telegram: { enabled: false, token: '', ... },
@@ -125,14 +125,14 @@ The configuration includes:
   imessage: { enabled: false, ... },
 
   agent: {
-    workspace: '~/clawd',        // Where memory and files are stored
+    workspace: '~/openclawd',        // Where memory and files are stored
     maxTurns: 50,                // Max tool calls per message
     allowedTools: ['Read', 'Write', 'Edit', 'Bash', 'Glob', 'Grep']
   },
 
   browser: {
     enabled: true,
-    mode: 'clawd',               // 'clawd' or 'chrome'
+    mode: 'managed',               // 'managed' or 'chrome'
     ...
   }
 }
@@ -234,18 +234,18 @@ imessage: {
 
 ## Browser Control
 
-Clawd can control a web browser to navigate pages, click buttons, fill forms, and take screenshots. There are two modes:
+OpenClawd can control a web browser to navigate pages, click buttons, fill forms, and take screenshots. There are two modes:
 
-### Clawd Mode (Isolated Browser)
+### Managed Mode (Isolated Browser)
 
 This launches a dedicated Chromium browser with its own profile. Your browsing data is kept separate from your personal browser.
 
 **Setup:**
 
 1. Run `node cli.js` and select "Configure browser"
-2. Select "clawd - Managed browser"
+2. Select "managed - Managed browser"
 3. When prompted, allow it to install Playwright's Chromium browser
-4. Choose a profile path or accept the default (`~/.clawd-browser-profile`)
+4. Choose a profile path or accept the default (`~/.openclawd-browser`)
 5. Choose whether to run headless (no visible window)
 
 The browser will launch automatically when you start the gateway or terminal chat.
@@ -309,7 +309,7 @@ Once browser is enabled, the assistant can:
 
 ## Memory System
 
-Clawd maintains persistent memory across conversations. All memory is stored in the workspace directory (default: `~/clawd/`).
+OpenClawd maintains persistent memory across conversations. All memory is stored in the workspace directory (default: `~/openclawd/`).
 
 ### Memory Structure
 
@@ -363,13 +363,13 @@ For advanced scheduling, the assistant can use cron expressions:
 - `0 9 * * 1-5` - Weekdays at 9:00 AM
 - `30 14 * * 1` - Every Monday at 2:30 PM
 
-Scheduled jobs persist across restarts and are stored in `~/.clawd/cron-jobs.json`.
+Scheduled jobs persist across restarts and are stored in `~/.openclawd/cron-jobs.json`.
 
 ---
 
 ## App Integrations (MCP)
 
-Clawd uses the Model Context Protocol (MCP) for integrations. Configure MCP servers in `mcp-servers.json`:
+OpenClawd uses the Model Context Protocol (MCP) for integrations. Configure MCP servers in `mcp-servers.json`:
 
 ```json
 {
@@ -423,14 +423,14 @@ Or if you link the package globally:
 
 ```bash
 npm link
-clawd              # Interactive menu
-clawd chat         # Terminal chat
-clawd start        # Start gateway
+oclawd             # Interactive menu
+oclawd chat         # Terminal chat
+oclawd start        # Start gateway
 ```
 
 ### Chat Commands
 
-Use these commands while chatting with Clawd on any platform:
+Use these commands while chatting with OpenClawd on any platform:
 
 | Command | Description |
 |---------|-------------|
@@ -482,7 +482,7 @@ Check that:
 
 Delete the `auth_whatsapp/` folder and restart the gateway to force a new authentication.
 
-### Browser Not Starting (Clawd Mode)
+### Browser Not Starting (Managed Mode)
 
 Run the browser setup again and make sure Playwright's Chromium is installed:
 
@@ -524,14 +524,14 @@ Check that the port in your config matches the port Chrome is using.
 Check that the workspace directory exists and is writable:
 
 ```bash
-ls -la ~/clawd/
+ls -la ~/openclawd/
 ```
 
 If it does not exist, it will be created automatically on first use.
 
 ### Scheduled Jobs Not Running
 
-- Jobs persist in `~/.clawd/cron-jobs.json`
+- Jobs persist in `~/.openclawd/cron-jobs.json`
 - Jobs only execute while the gateway is running
 - Use `/memory list` in chat to check scheduled jobs
 
@@ -540,7 +540,7 @@ If it does not exist, it will be created automatically on first use.
 ## Directory Structure
 
 ```
-clawd/
+messaging/
   config.js           # Configuration file
   cli.js              # CLI entry point
   gateway.js          # Main gateway process
@@ -565,7 +565,7 @@ clawd/
     manager.js
   auth_whatsapp/      # WhatsApp auth (created on first run)
 
-~/clawd/              # Workspace (created on first run)
+~/openclawd/              # Workspace (created on first run)
   MEMORY.md           # Long-term memory
   memory/             # Daily logs
     2025-01-28.md

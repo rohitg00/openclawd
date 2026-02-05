@@ -1,5 +1,5 @@
 /**
- * Slash command handler for Clawd
+ * Slash command handler for OpenClawd
  * Processes commands like /new, /reset, /status, /memory
  */
 export default class CommandHandler {
