@@ -1879,7 +1879,12 @@ async function loadMcpServers() {
     const data = await response.json();
 
     if (data.servers.length === 0) {
-      listEl.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">No MCP servers configured. Browse the catalog to add some.</p>';
+      listEl.innerHTML = `
+        <div class="mcp-empty-state">
+          <p>No MCP servers configured yet.</p>
+          <p>Browse the catalog to add integrations like GitHub, Slack, Google Drive, and more.</p>
+        </div>
+      `;
       return;
     }
 
@@ -1887,9 +1892,16 @@ async function loadMcpServers() {
       <div class="mcp-server-item">
         <div class="mcp-server-info">
           <span class="mcp-server-name">${server.name}</span>
-          <span class="mcp-server-desc">${server.type} server</span>
+          <span class="mcp-server-desc">${server.type} · ${server.enabled ? 'Enabled' : 'Disabled'}</span>
         </div>
-        <button class="mcp-server-toggle ${server.enabled ? 'enabled' : ''}" data-server="${server.name}"></button>
+        <div class="mcp-server-actions">
+          <button class="mcp-server-toggle ${server.enabled ? 'enabled' : ''}" data-server="${server.name}" title="${server.enabled ? 'Disable' : 'Enable'}"></button>
+          <button class="mcp-server-delete" data-server="${server.name}" title="Remove server">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+            </svg>
+          </button>
+        </div>
       </div>
     `).join('');
 
@@ -1902,8 +1914,30 @@ async function loadMcpServers() {
         try {
           await fetch(`${API_BASE}/api/mcp/servers/${serverName}/${endpoint}`, { method: 'PUT' });
           toggle.classList.toggle('enabled');
+          const desc = toggle.closest('.mcp-server-item').querySelector('.mcp-server-desc');
+          const type = desc.textContent.split(' · ')[0];
+          desc.textContent = `${type} · ${isEnabled ? 'Disabled' : 'Enabled'}`;
         } catch (err) {
           console.error('Failed to toggle server:', err);
+        }
+      });
+    });
+
+    listEl.querySelectorAll('.mcp-server-delete').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const serverName = btn.dataset.server;
+        if (!confirm(`Remove "${serverName}" server?`)) return;
+
+        try {
+          const response = await fetch(`${API_BASE}/api/mcp/servers/${serverName}`, { method: 'DELETE' });
+          if (response.ok) {
+            loadMcpServers();
+          } else {
+            alert('Failed to remove server');
+          }
+        } catch (err) {
+          console.error('Failed to delete server:', err);
+          alert('Failed to remove server');
         }
       });
     });
@@ -1919,7 +1953,10 @@ async function loadCatalog(category = 'all') {
   const listEl = document.getElementById('catalogList');
   if (!listEl) return;
 
+  listEl.innerHTML = '<p style="color: var(--text-muted); text-align: center;">Loading catalog...</p>';
+
   try {
+    await loadInstalledServerIds();
     const endpoint = category === 'all' ? '/api/mcp/catalog' : `/api/mcp/catalog/${category}`;
     const response = await fetch(`${API_BASE}${endpoint}`);
     const data = await response.json();
@@ -1932,24 +1969,41 @@ async function loadCatalog(category = 'all') {
   }
 }
 
+let installedServerIds = new Set();
+
+async function loadInstalledServerIds() {
+  try {
+    const response = await fetch(`${API_BASE}/api/mcp/servers`);
+    const data = await response.json();
+    installedServerIds = new Set(data.servers.map(s => s.name));
+  } catch (err) {
+    console.error('Failed to load installed servers:', err);
+  }
+}
+
 function renderCatalog(servers) {
   const listEl = document.getElementById('catalogList');
   if (!listEl) return;
 
-  listEl.innerHTML = servers.map(server => `
-    <div class="catalog-item">
+  listEl.innerHTML = servers.map(server => {
+    const isInstalled = installedServerIds.has(server.id);
+    return `
+    <div class="catalog-item ${isInstalled ? 'installed' : ''}">
       <div class="catalog-item-info">
         <div class="catalog-item-name">
           ${server.name}
-          ${server.noAuth ? '<span class="catalog-item-badge no-auth">No API key needed</span>' : ''}
+          ${!server.requiresAuth ? '<span class="catalog-item-badge no-auth">No API key</span>' : '<span class="catalog-item-badge requires-auth">Requires API key</span>'}
         </div>
         <div class="catalog-item-desc">${server.description || ''}</div>
+        <div class="catalog-item-package">${server.package || ''}</div>
       </div>
-      <button class="install-btn" data-server="${server.id}">Install</button>
+      <button class="install-btn ${isInstalled ? 'installed' : ''}" data-server="${server.id}" ${isInstalled ? 'disabled' : ''}>
+        ${isInstalled ? '✓ Installed' : 'Install'}
+      </button>
     </div>
-  `).join('');
+  `}).join('');
 
-  listEl.querySelectorAll('.install-btn').forEach(btn => {
+  listEl.querySelectorAll('.install-btn:not(.installed)').forEach(btn => {
     btn.addEventListener('click', async () => {
       const serverId = btn.dataset.server;
       btn.textContent = 'Installing...';
@@ -1963,16 +2017,21 @@ function renderCatalog(servers) {
         });
 
         if (response.ok) {
-          btn.textContent = 'Installed';
+          btn.textContent = '✓ Installed';
           btn.classList.add('installed');
+          installedServerIds.add(serverId);
+          loadMcpServers();
         } else {
           const data = await response.json();
-          btn.textContent = data.message?.includes('exists') ? 'Already Added' : 'Failed';
-          btn.classList.add('installed');
+          btn.textContent = data.message?.includes('exists') ? '✓ Installed' : 'Failed';
+          if (data.message?.includes('exists')) {
+            btn.classList.add('installed');
+          }
         }
       } catch (err) {
         console.error('Failed to install server:', err);
         btn.textContent = 'Failed';
+        btn.disabled = false;
       }
     });
   });
