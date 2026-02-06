@@ -2,6 +2,10 @@
 
 Multi-provider AI platform. 20+ LLMs. MCP integrations. Desktop + messaging.
 
+## Architecture
+
+![OpenClawd Architecture](docs/architecture.png)
+
 ```bash
 npx openclawd
 ```
