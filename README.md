@@ -7,7 +7,7 @@ Multi-provider AI platform. 20+ LLMs. MCP integrations. Desktop + messaging.
 ![OpenClawd Architecture](docs/architecture.png)
 
 ```bash
-npx openclawd
+npx openclawd-cli
 ```
 
 ## Install
