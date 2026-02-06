@@ -210,15 +210,15 @@
 
     .demo-content {
       aspect-ratio: 16/9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: relative;
+      overflow: hidden;
       background: #0c0a09;
     }
 
-    .demo-placeholder {
-      color: #44403c;
-      font-size: 0.85rem;
+    .demo-content video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .features {
@@ -357,7 +357,9 @@
         <div class="demo-dot"></div>
       </div>
       <div class="demo-content">
-        <span class="demo-placeholder">~</span>
+        <video autoplay loop muted playsinline>
+          <source src="demo.mp4" type="video/mp4">
+        </video>
       </div>
     </div>
 
