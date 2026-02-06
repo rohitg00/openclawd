@@ -391,9 +391,9 @@
 
     (function() {
       var repo = 'rohitg00/openclawd';
-      var releasesUrl = 'https://github.com/' + repo + '/releases/latest';
-      var apiUrl = 'https://api.github.com/repos/' + repo + '/releases/latest';
-      var cacheKey = 'openclawd_release_cache';
+      var releasesUrl = 'https://github.com/' + repo + '/releases';
+      var apiUrl = 'https://api.github.com/repos/' + repo + '/releases?per_page=5';
+      var cacheKey = 'openclawd_release_cache_v2';
       var cacheTTL = 10 * 60 * 1000;
       var buttons = document.querySelectorAll('.download-btn[data-pattern]');
 
@@ -412,6 +412,14 @@
         }
       });
 
+      function findReleaseWithAssets(releases) {
+        if (!Array.isArray(releases)) return null;
+        for (var i = 0; i < releases.length; i++) {
+          if (releases[i].assets && releases[i].assets.length > 0) return releases[i];
+        }
+        return null;
+      }
+
       function resolveAssets(release) {
         if (!release || !release.assets) return;
         buttons.forEach(function(btn) {
@@ -419,8 +427,6 @@
           var asset = release.assets.find(function(a) { return a.name.indexOf(pattern) !== -1; });
           if (asset) {
             btn.href = asset.browser_download_url;
-          } else {
-            btn.href = releasesUrl;
           }
         });
       }
@@ -436,7 +442,8 @@
       fetch(apiUrl).then(function(r) {
         if (!r.ok) return null;
         return r.json();
-      }).then(function(release) {
+      }).then(function(releases) {
+        var release = findReleaseWithAssets(releases);
         if (!release) return;
         try { sessionStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), data: release })); } catch(e) {}
         resolveAssets(release);
