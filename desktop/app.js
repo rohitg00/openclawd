@@ -2342,19 +2342,45 @@ window.saveOnboardingKeys = async function() {
   if (openaiKey) keys.openai = openaiKey;
   if (geminiKey) keys.gemini = geminiKey;
 
-  if (Object.keys(keys).length > 0) {
-    try {
-      await fetch(`${API_BASE}/api/settings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKeys: keys })
-      });
-    } catch (err) {
-      console.error('Failed to save onboarding keys:', err);
-    }
+  if (Object.keys(keys).length === 0) {
+    nextOnboardingStep(3);
+    return;
   }
 
-  nextOnboardingStep(3);
+  const step2 = document.getElementById('onboardingStep2');
+  let errorEl = step2?.querySelector('.onboarding-error');
+
+  try {
+    const response = await fetch(`${API_BASE}/api/settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKeys: keys })
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || `Server returned ${response.status}`);
+    }
+
+    if (errorEl) errorEl.remove();
+    nextOnboardingStep(3);
+  } catch (err) {
+    console.error('Failed to save onboarding keys:', err);
+    if (!errorEl && step2) {
+      errorEl = document.createElement('p');
+      errorEl.className = 'onboarding-error';
+      errorEl.style.cssText = 'color: #ef4444; font-size: 13px; margin-top: 12px; text-align: center;';
+      const actions = step2.querySelector('.onboarding-actions');
+      if (actions) {
+        step2.insertBefore(errorEl, actions);
+      } else {
+        step2.appendChild(errorEl);
+      }
+    }
+    if (errorEl) {
+      errorEl.textContent = `Failed to save keys: ${err.message}. Is the server running?`;
+    }
+  }
 };
 
 window.saveOnboardingMcp = async function() {

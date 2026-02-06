@@ -64,6 +64,7 @@ async function runOnboarding() {
   });
 
   if (p.isCancel(shouldSetup) || !shouldSetup) {
+    saveEnvFile(loadEnvFile());
     p.log.info('Skipping setup. You can configure keys later via the Settings UI.');
     p.outro(color.dim('Starting server...'));
     return;
@@ -91,6 +92,7 @@ async function runOnboarding() {
   });
 
   if (p.isCancel(keys)) {
+    saveEnvFile(loadEnvFile());
     p.outro(color.dim('Starting server...'));
     return;
   }
@@ -105,12 +107,13 @@ async function runOnboarding() {
     keys.gemini && 'Gemini',
   ].filter(Boolean);
 
+  const s = p.spinner();
+  s.start('Saving configuration');
+  saveEnvFile(env);
   if (configured.length > 0) {
-    const s = p.spinner();
-    s.start('Saving configuration');
-    saveEnvFile(env);
     s.stop(`Saved ${configured.length} key(s): ${configured.join(', ')}`);
   } else {
+    s.stop('Configuration saved');
     p.log.info(
       `No keys added. You can use ${color.bold('Opencode')} provider for free models,\n  or run ${color.bold('Ollama')} locally for offline access.`
     );
@@ -138,14 +141,23 @@ async function runOnboarding() {
 
 async function installMcpServers(servers) {
   const baseUrl = `http://localhost:${PORT}`;
+  let serverHealthy = false;
 
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
       const res = await fetch(`${baseUrl}/api/health`);
-      if (res.ok) break;
+      if (res.ok) {
+        serverHealthy = true;
+        break;
+      }
     } catch {
       await new Promise(r => setTimeout(r, 1000));
     }
+  }
+
+  if (!serverHealthy) {
+    console.error(`  ${color.red('!')} Server on port ${PORT} did not become healthy; skipping MCP install`);
+    return;
   }
 
   for (const serverId of servers) {
@@ -183,7 +195,11 @@ function startServer() {
     process.exit(code ?? 0);
   });
 
+  let isShuttingDown = false;
+
   function shutdown() {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
     console.log(color.dim('\nShutting down OpenClawd...'));
     child.kill('SIGINT');
     setTimeout(() => {

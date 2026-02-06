@@ -2,9 +2,8 @@
   "name": "openclawd",
   "version": "1.0.0",
   "main": "main.js",
-  "type": "module",
   "bin": {
-    "openclawd": "./bin/cli.js"
+    "openclawd": "./bin/cli.mjs"
   },
   "scripts": {
     "dev": "NODE_ENV=development electron .",
