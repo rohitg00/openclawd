@@ -684,6 +684,112 @@
     </div>
   </div>
 
+  <!-- Onboarding Overlay -->
+  <div class="onboarding-overlay hidden" id="onboardingOverlay">
+    <div class="onboarding-container">
+      <div class="onboarding-progress">
+        <div class="onboarding-dot active" data-step="1"></div>
+        <div class="onboarding-dot" data-step="2"></div>
+        <div class="onboarding-dot" data-step="3"></div>
+      </div>
+
+      <!-- Step 1: Welcome -->
+      <div class="onboarding-step active" id="onboardingStep1">
+        <div class="onboarding-icon">
+          <svg viewBox="0 0 48 48" fill="none" stroke="var(--accent-amber)" stroke-width="2">
+            <circle cx="24" cy="24" r="20"></circle>
+            <path d="M24 14v10l7 5" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <h2>Welcome to OpenClawd</h2>
+        <p>Your desktop AI chat with 20+ LLM providers and MCP integrations. Let's get you set up in under a minute.</p>
+        <div class="onboarding-actions">
+          <button class="btn-secondary" onclick="skipOnboarding()">Skip Setup</button>
+          <button class="btn-primary" onclick="nextOnboardingStep(2)">Get Started</button>
+        </div>
+      </div>
+
+      <!-- Step 2: API Keys -->
+      <div class="onboarding-step" id="onboardingStep2">
+        <h2>Add an API Key</h2>
+        <p>Add at least one provider key to start chatting. Anthropic is recommended.</p>
+        <div class="onboarding-keys">
+          <div class="onboarding-key-group">
+            <label>
+              <span class="onboarding-key-label">Anthropic (Claude)</span>
+              <span class="onboarding-key-badge recommended">Recommended</span>
+            </label>
+            <input type="password" id="onboarding-anthropic-key" placeholder="sk-ant-..." autocomplete="off">
+          </div>
+          <div class="onboarding-key-group">
+            <label>
+              <span class="onboarding-key-label">OpenAI (GPT-4)</span>
+            </label>
+            <input type="password" id="onboarding-openai-key" placeholder="sk-..." autocomplete="off">
+          </div>
+          <div class="onboarding-key-group">
+            <label>
+              <span class="onboarding-key-label">Google (Gemini)</span>
+            </label>
+            <input type="password" id="onboarding-gemini-key" placeholder="AI..." autocomplete="off">
+          </div>
+          <div class="onboarding-free-note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>No API key? Select <strong>Opencode</strong> as provider for free models, or run <strong>Ollama</strong> locally.</span>
+          </div>
+        </div>
+        <div class="onboarding-actions">
+          <button class="btn-secondary" onclick="nextOnboardingStep(3)">Skip</button>
+          <button class="btn-primary" onclick="saveOnboardingKeys()">Save & Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 3: MCP Servers -->
+      <div class="onboarding-step" id="onboardingStep3">
+        <h2>Enable MCP Servers</h2>
+        <p>MCP servers connect Claude to external tools. These popular ones work without API keys.</p>
+        <div class="onboarding-mcp-list" id="onboardingMcpList">
+          <label class="onboarding-mcp-item">
+            <input type="checkbox" value="filesystem" checked>
+            <div class="onboarding-mcp-info">
+              <span class="onboarding-mcp-name">Filesystem</span>
+              <span class="onboarding-mcp-desc">Read and write local files</span>
+            </div>
+          </label>
+          <label class="onboarding-mcp-item">
+            <input type="checkbox" value="memory">
+            <div class="onboarding-mcp-info">
+              <span class="onboarding-mcp-name">Memory</span>
+              <span class="onboarding-mcp-desc">Persistent knowledge graph</span>
+            </div>
+          </label>
+          <label class="onboarding-mcp-item">
+            <input type="checkbox" value="fetch">
+            <div class="onboarding-mcp-info">
+              <span class="onboarding-mcp-name">Fetch</span>
+              <span class="onboarding-mcp-desc">Fetch web pages and APIs</span>
+            </div>
+          </label>
+          <label class="onboarding-mcp-item">
+            <input type="checkbox" value="brave-search">
+            <div class="onboarding-mcp-info">
+              <span class="onboarding-mcp-name">Brave Search</span>
+              <span class="onboarding-mcp-desc">Web search via Brave</span>
+            </div>
+          </label>
+        </div>
+        <div class="onboarding-actions">
+          <button class="btn-secondary" onclick="skipOnboarding()">Skip</button>
+          <button class="btn-primary" onclick="saveOnboardingMcp()">Finish Setup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>

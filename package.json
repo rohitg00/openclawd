@@ -2,6 +2,9 @@
   "name": "openclawd",
   "version": "1.0.0",
   "main": "main.js",
+  "bin": {
+    "openclawd": "./bin/cli.mjs"
+  },
   "scripts": {
     "dev": "NODE_ENV=development electron .",
     "start": "electron .",
@@ -23,10 +26,12 @@
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.7",
+    "@clack/prompts": "^0.11.0",
     "@opencode-ai/sdk": "latest",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "picocolors": "^1.1.1"
   },
   "optionalDependencies": {
     "@github/copilot-sdk": "^0.1.13"
