@@ -84,6 +84,35 @@ AI on WhatsApp, Telegram, Signal, iMessage:
 cd messaging && npm install && node cli.js
 ```
 
+## Detailed Architecture
+
+![OpenClawd Detailed Architecture](docs/architecture-detailed.png)
+
+### User Interfaces
+- **Desktop App** — Electron-based native app for macOS, Windows, Linux
+- **CLI** — `npx openclawd` for terminal-first workflows
+- **Messaging Gateway** — WhatsApp, Telegram, Signal, iMessage bots
+
+### Backend (Server :3001)
+- **Chat API** — SSE-streamed responses for real-time conversation
+- **Provider Registry** — Unified interface to 20+ LLM providers
+- **MCP Manager** — Loader + catalog for 30+ MCP server integrations
+- **Auth Profiles & Usage** — API key management and usage tracking
+- **Agent Loop & Memory** — Persistent conversation context and agent orchestration
+
+### LLM Providers (20+)
+Claude (Agent SDK), OpenCode (Free+Paid), Ollama (Local), OpenAI, Gemini, Groq, DeepSeek, Mistral, xAI, and more.
+
+### MCP Servers (30+ catalog)
+Filesystem, Memory, GitHub, Fetch, Brave, Slack, Git, DB, and more. Add from the built-in catalog or configure manually.
+
+### Build & Release (GitHub Actions)
+- macOS `.dmg` / `.zip`
+- Windows `.exe` (NSIS)
+- Linux `.AppImage` / `.deb`
+- npm `openclawd-cli`
+- GitHub Release (Draft)
+
 ## License
 
 MIT
