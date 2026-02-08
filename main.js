@@ -4,6 +4,15 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
 
+function isSafeExternalUrl(url) {
+  try {
+    const parsed = new URL(url);
+    return ['https:', 'http:', 'mailto:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
 const isDev = process.env.NODE_ENV === 'development';
 
 if (isDev) {
@@ -22,6 +31,7 @@ let serverProcess = null;
 let isShuttingDown = false;
 
 const SERVER_PORT = 3456;
+process.env.OPENCLAWD_SERVER_PORT = String(SERVER_PORT);
 const userDataPath = app.getPath('userData');
 
 function getServerDir() {
@@ -114,6 +124,7 @@ function startServer() {
 
     const serverEnv = {
       ...process.env,
+      PORT: String(SERVER_PORT),
       OPENCLAWD_USER_DATA: userDataPath,
       OPENCLAWD_ENV_PATH: envPath,
       OPENCLAWD_MCP_CONFIG_PATH: mcpPath
@@ -181,7 +192,7 @@ function createWindow() {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js'),
       enableWebSQL: false,
-      webSecurity: true
+      webSecurity: true,
     }
   });
 
@@ -192,14 +203,18 @@ function createWindow() {
   });
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    if (isSafeExternalUrl(url)) {
+      shell.openExternal(url);
+    }
     return { action: 'deny' };
   });
 
   mainWindow.webContents.on('will-navigate', (event, url) => {
     if (!url.startsWith('file://')) {
       event.preventDefault();
-      shell.openExternal(url);
+      if (isSafeExternalUrl(url)) {
+        shell.openExternal(url);
+      }
     }
   });
 }
@@ -233,7 +248,27 @@ async function launchWithRetry() {
   }
 }
 
-app.on('ready', launchWithRetry);
+app.on('ready', () => {
+  const { session } = require('electron');
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [
+          "default-src 'self'; " +
+          "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+          "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
+          "font-src 'self' https://fonts.gstatic.com; " +
+          "connect-src 'self' http://localhost:* http://127.0.0.1:*; " +
+          "img-src 'self' data: https:; " +
+          "frame-src https://browser.anchor.dev"
+        ]
+      }
+    });
+  });
+
+  launchWithRetry();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

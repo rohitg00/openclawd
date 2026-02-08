@@ -11,6 +11,39 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DEFAULT_CONFIG_PATH = process.env.OPENCLAWD_MCP_CONFIG_PATH || path.join(__dirname, 'mcp-servers.json');
 
+const ALLOWED_COMMANDS = new Set([
+  'node', 'npx', 'python3', 'python', 'uvx', 'uv', 'docker', 'deno', 'bun', 'bunx'
+]);
+
+function validateMcpCommand(command, args = []) {
+  const basename = command.split('/').pop();
+  if (!ALLOWED_COMMANDS.has(basename)) {
+    throw new Error(`Command not allowed: ${command}. Allowed: ${[...ALLOWED_COMMANDS].join(', ')}`);
+  }
+  const dangerous = /[;&|`$(){}[\]<>!#~]/;
+  for (const arg of args) {
+    if (dangerous.test(arg)) {
+      throw new Error(`Shell metacharacter detected in argument: ${arg}`);
+    }
+  }
+}
+
+const ALLOWED_ENV_PREFIXES = [
+  'ANTHROPIC_', 'OPENAI_', 'GOOGLE_', 'GROQ_', 'DEEPSEEK_', 'MISTRAL_',
+  'XAI_', 'VENICE_', 'OPENROUTER_', 'GITHUB_TOKEN', 'OPENCLAWD_',
+  'HOME', 'PATH', 'USER', 'NODE_', 'NPM_'
+];
+
+const BLOCKED_ENV_VARS = new Set([
+  'AWS_SECRET_ACCESS_KEY', 'AWS_SESSION_TOKEN', 'DATABASE_URL',
+  'PRIVATE_KEY', 'SSH_KEY', 'SUDO_ASKPASS'
+]);
+
+function isSafeEnvVar(name) {
+  if (BLOCKED_ENV_VARS.has(name)) return false;
+  return ALLOWED_ENV_PREFIXES.some(prefix => name.startsWith(prefix));
+}
+
 export function loadMcpServers(configPath = DEFAULT_CONFIG_PATH) {
   const filePath = configPath;
 
@@ -23,6 +56,10 @@ export function loadMcpServers(configPath = DEFAULT_CONFIG_PATH) {
     let content = readFileSync(filePath, 'utf-8');
 
     content = content.replace(/\$\{([^}]+)\}/g, (_, key) => {
+      if (!isSafeEnvVar(key)) {
+        console.log(`[MCP] Blocked env var substitution: ${key}`);
+        return '';
+      }
       const value = process.env[key];
       if (!value) {
         console.log(`[MCP] Warning: Environment variable ${key} not set`);
@@ -61,6 +98,14 @@ export function loadMcpServers(configPath = DEFAULT_CONFIG_PATH) {
       } else if (serverConfig.type === 'stdio') {
         if (!serverConfig.command) {
           console.log(`[MCP] Skipping ${name}: missing command`);
+          skippedCount++;
+          continue;
+        }
+
+        try {
+          validateMcpCommand(serverConfig.command, serverConfig.args || []);
+        } catch (err) {
+          console.log(`[MCP] Skipping ${name}: ${err.message}`);
           skippedCount++;
           continue;
         }
@@ -141,6 +186,14 @@ export function addMcpServer(serverId, serverConfig, configPath = DEFAULT_CONFIG
 
   if (serverConfig.type === 'stdio' && !serverConfig.command) {
     return { success: false, error: 'stdio servers require a command' };
+  }
+
+  if (serverConfig.type === 'stdio') {
+    try {
+      validateMcpCommand(serverConfig.command, serverConfig.args || []);
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
   }
 
   if (serverConfig.type === 'http' && !serverConfig.url) {

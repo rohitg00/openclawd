@@ -191,6 +191,23 @@ export function loadUsageHistory(configDir) {
   }
 }
 
+export function getUsageHistory() {
+  const days = [];
+  for (const [key, usage] of usageCache.entries()) {
+    const [provider, date] = key.split(':');
+    const cost = estimateCost(provider, usage.input, usage.output);
+    days.push({
+      date,
+      provider,
+      inputTokens: usage.input,
+      outputTokens: usage.output,
+      requests: usage.requests,
+      cost
+    });
+  }
+  return days.sort((a, b) => b.date.localeCompare(a.date));
+}
+
 export function clearUsageCache() {
   usageCache.clear();
 }

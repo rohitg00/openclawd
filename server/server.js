@@ -1,8 +1,19 @@
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import dotenv from 'dotenv';
+import { loadEnvFile, saveEnvFile } from './env-utils.js';
+import {
+  startChannel,
+  stopChannel,
+  getChannelStatus,
+  getAllSessions,
+  autoStartChannels,
+  getWhatsAppQR
+} from './channels/channel-manager.js';
 import { getProvider, getAvailableProviders, initializeProviders } from './providers/index.js';
 import {
   loadMcpServers,
@@ -46,7 +57,8 @@ import {
   formatUsageDetailed,
   loadUsageHistory,
   saveUsageHistory,
-  getUsageStats
+  getUsageStats,
+  getUsageHistory
 } from './providers/usage-tracking.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -86,8 +98,38 @@ async function initializeLlmProviders() {
   loadUsageHistory(configDir);
 }
 
-app.use(cors());
+app.use(cors({
+  origin: function(origin, callback) {
+    const allowed = [
+      `http://localhost:${PORT}`,
+      `http://127.0.0.1:${PORT}`,
+      undefined
+    ];
+    if (!origin || allowed.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed'));
+    }
+  }
+}));
 app.use(express.json());
+
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const chatLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/', generalLimiter);
+app.use('/api/chat', chatLimiter);
 
 app.post('/api/chat', async (req, res) => {
   const {
@@ -114,6 +156,14 @@ app.post('/api/chat', async (req, res) => {
       error: `Invalid provider: ${providerName}. Available: ${availableProviders.join(', ')}`
     });
   }
+
+  res.setTimeout(600000, () => {
+    console.log('[CHAT] Request timed out after 10 minutes, chatId:', chatId);
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: 'Request timed out after 10 minutes' })}\n\n`);
+      res.end();
+    }
+  });
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache, no-transform');
@@ -142,13 +192,21 @@ app.post('/api/chat', async (req, res) => {
     let inputTokens = 0;
     let outputTokens = 0;
 
-    try {
-      for await (const chunk of provider.query({
+    const fallbackProvider = process.env.FALLBACK_PROVIDER;
+    const fallbackModel = process.env.FALLBACK_MODEL;
+
+    let activeProvider = provider;
+    let activeModelId = modelId;
+    let activeProviderName = providerName;
+    let fallbackAttempted = false;
+
+    const streamFromProvider = async (prov, mId) => {
+      for await (const chunk of prov.query({
         prompt: message,
         chatId,
         userId,
         mcpServers,
-        model: modelId,
+        model: mId,
         allowedTools: ['Read', 'Write', 'Edit', 'Bash', 'Glob', 'Grep', 'WebSearch', 'WebFetch', 'TodoWrite', 'Skill'],
         maxTurns: 100
       })) {
@@ -166,10 +224,37 @@ app.post('/api/chat', async (req, res) => {
         const data = `data: ${JSON.stringify(chunk)}\n\n`;
         res.write(data);
       }
+    };
+
+    try {
+      await streamFromProvider(activeProvider, activeModelId);
     } catch (streamError) {
-      console.error('[CHAT] Stream error during iteration:', streamError);
-      if (!res.writableEnded) {
-        res.write(`data: ${JSON.stringify({ type: 'error', message: streamError.message })}\n\n`);
+      console.error('[CHAT] Stream error:', streamError.message);
+
+      if (!fallbackAttempted && fallbackProvider && fallbackModel) {
+        fallbackAttempted = true;
+        try {
+          const fbProvider = getProvider(fallbackProvider);
+          const { modelId: fbModelId } = parseModelRef(fallbackModel);
+
+          res.write(`data: ${JSON.stringify({ type: 'fallback', from: `${providerName}/${modelId}`, to: `${fallbackProvider}/${fbModelId}` })}\n\n`);
+
+          console.log(`[CHAT] Falling back to ${fallbackProvider}/${fbModelId}`);
+          activeProvider = fbProvider;
+          activeModelId = fbModelId;
+          activeProviderName = fallbackProvider;
+
+          await streamFromProvider(fbProvider, fbModelId);
+        } catch (fbError) {
+          console.error('[CHAT] Fallback also failed:', fbError.message);
+          if (!res.writableEnded) {
+            res.write(`data: ${JSON.stringify({ type: 'error', message: fbError.message })}\n\n`);
+          }
+        }
+      } else {
+        if (!res.writableEnded) {
+          res.write(`data: ${JSON.stringify({ type: 'error', message: streamError.message })}\n\n`);
+        }
       }
     }
 
@@ -278,6 +363,11 @@ app.get('/api/llm/usage', (_req, res) => {
     detailed: formatUsageDetailed(summary),
     stats
   });
+});
+
+app.get('/api/llm/usage/history', (_req, res) => {
+  const history = getUsageHistory();
+  res.json({ days: history });
 });
 
 app.get('/api/auth/profiles', (_req, res) => {
@@ -587,6 +677,46 @@ app.put('/api/mcp/config', (req, res) => {
   }
 });
 
+app.get('/api/channels/status', (_req, res) => {
+  res.json(getChannelStatus());
+});
+
+app.post('/api/channels/:channel/start', async (req, res) => {
+  const { channel } = req.params;
+  const config = req.body;
+
+  try {
+    const status = await startChannel(channel, config, mcpServers);
+    res.json({ success: true, status });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/channels/:channel/stop', async (req, res) => {
+  const { channel } = req.params;
+
+  try {
+    const status = await stopChannel(channel);
+    res.json({ success: true, status });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/channels/sessions', (_req, res) => {
+  res.json({ sessions: getAllSessions() });
+});
+
+app.get('/api/channels/whatsapp/qr', (_req, res) => {
+  const qr = getWhatsAppQR();
+  if (qr) {
+    res.json({ qr });
+  } else {
+    res.json({ qr: null, message: 'No QR code available' });
+  }
+});
+
 app.get('/api/health', async (_req, res) => {
   const llmProviders = await getLlmProviders();
   const summary = getUsageSummary();
@@ -601,38 +731,8 @@ app.get('/api/health', async (_req, res) => {
   });
 });
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-
-function loadEnvFile() {
-  if (!existsSync(envFilePath)) return {};
-  const content = readFileSync(envFilePath, 'utf-8');
-  const env = {};
-  for (const line of content.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    const eqIndex = trimmed.indexOf('=');
-    if (eqIndex > 0) {
-      const key = trimmed.slice(0, eqIndex).trim();
-      const value = trimmed.slice(eqIndex + 1).trim();
-      env[key] = value;
-    }
-  }
-  return env;
-}
-
-function saveEnvFile(env) {
-  const lines = [];
-  lines.push('# OpenClawd Configuration');
-  lines.push('# Generated by Settings UI');
-  lines.push('');
-  for (const [key, value] of Object.entries(env)) {
-    if (value) lines.push(`${key}=${value}`);
-  }
-  writeFileSync(envFilePath, lines.join('\n') + '\n');
-}
-
 app.get('/api/settings', (_req, res) => {
-  const env = loadEnvFile();
+  const env = loadEnvFile(envFilePath);
   const masked = {};
   for (const [key, value] of Object.entries(env)) {
     if (key.includes('KEY') || key.includes('TOKEN') || key.includes('SECRET')) {
@@ -650,7 +750,7 @@ app.get('/api/settings', (_req, res) => {
 app.post('/api/settings', (req, res) => {
   const { apiKeys = {}, general = {} } = req.body;
 
-  const env = loadEnvFile();
+  const env = loadEnvFile(envFilePath);
 
   const keyMap = {
     anthropic: 'ANTHROPIC_API_KEY',
@@ -675,7 +775,14 @@ app.post('/api/settings', (req, res) => {
     env.BACKEND_URL = general.backendUrl;
   }
 
-  saveEnvFile(env);
+  if (general.fallbackProvider !== undefined) {
+    env.FALLBACK_PROVIDER = general.fallbackProvider;
+  }
+  if (general.fallbackModel !== undefined) {
+    env.FALLBACK_MODEL = general.fallbackModel;
+  }
+
+  saveEnvFile(envFilePath, env);
 
   Object.assign(process.env, env);
 
@@ -687,7 +794,7 @@ app.post('/api/settings', (req, res) => {
 });
 
 app.get('/api/settings/providers-status', async (_req, res) => {
-  const env = loadEnvFile();
+  const env = loadEnvFile(envFilePath);
   const status = {};
 
   const checks = {
@@ -712,6 +819,7 @@ app.get('/api/settings/providers-status', async (_req, res) => {
 await initializeProviders();
 await initializeMcpServers();
 await initializeLlmProviders();
+await autoStartChannels(mcpServers);
 
 const server = app.listen(PORT, () => {
   console.log(`\n✓ Backend server running on http://localhost:${PORT}`);

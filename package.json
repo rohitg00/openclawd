@@ -23,7 +23,9 @@
     "build:linux": "electron-builder --linux",
     "build:all": "electron-builder -mwl",
     "icons": "electron-icon-builder --input=build/icon.png --output=build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "author": "Rohit Ghumare",
   "license": "MIT",
@@ -45,9 +47,11 @@
     "@github/copilot-sdk": "^0.1.13"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^4.0.18",
     "electron": "^39.5.1",
     "electron-builder": "^26.7.0",
     "electron-icon-builder": "^2.0.1",
-    "electron-reload": "^2.0.0-alpha.1"
+    "electron-reload": "^2.0.0-alpha.1",
+    "vitest": "^4.0.18"
   }
 }
