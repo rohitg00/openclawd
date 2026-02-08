@@ -1,6 +1,6 @@
 # OpenClawd
 
-Multi-provider AI platform. 20+ LLMs. MCP integrations. Desktop + messaging.
+Multi-provider AI platform. 20+ LLMs. MCP integrations. Desktop + messaging. Voice input. Token analytics.
 
 ## Architecture
 
@@ -48,6 +48,45 @@ MISTRAL_API_KEY        # Mistral/Codestral
 
 Ollama models auto-discovered when running locally.
 
+## Model Fallback
+
+Automatic failover when a provider fails. Configure in Settings > General or `.env`:
+
+```
+FALLBACK_PROVIDER=openai
+FALLBACK_MODEL=gpt-4o
+```
+
+When the primary provider errors out, OpenClawd automatically retries with the fallback.
+
+## Token Usage Dashboard
+
+Settings > Usage tab shows:
+
+- Summary cards (total tokens, estimated cost, request count)
+- 7-day token usage bar chart
+- Per-provider breakdown table
+- Per-message token badge in chat
+
+## Channel Bots
+
+Connect AI to messaging platforms. Configure in Settings > Channels or `.env`:
+
+```
+TELEGRAM_BOT_TOKEN=xxx        # Telegram (polling mode)
+DISCORD_BOT_TOKEN=xxx         # Discord (intents)
+SLACK_BOT_TOKEN=xoxb-xxx      # Slack (Socket Mode)
+SLACK_APP_TOKEN=xapp-xxx      # Slack app token
+```
+
+WhatsApp connects via QR code scan (Baileys, no token needed).
+
+Each bot supports `/reset`, `/model <name>`, and `/status` commands. Per-user conversation history with 50-message cap and 24h session expiry.
+
+## Voice Input
+
+Click the mic button or press `Cmd+Shift+V` to dictate. Uses the browser Web Speech API — no external services needed. Supports continuous dictation with interim results.
+
 ## MCP Servers
 
 20+ servers included. Add via API or config:
@@ -74,14 +113,17 @@ curl localhost:3001/api/llm/providers
 
 # MCP catalog
 curl localhost:3001/api/mcp/catalog
-```
 
-## Messaging Bot
+# Usage history
+curl localhost:3001/api/llm/usage/history
 
-AI on WhatsApp, Telegram, Signal, iMessage:
+# Channel status
+curl localhost:3001/api/channels/status
 
-```bash
-cd messaging && npm install && node cli.js
+# Start a channel bot
+curl -X POST localhost:3001/api/channels/telegram/start \
+  -H "Content-Type: application/json" \
+  -d '{"token": "your-bot-token"}'
 ```
 
 ## Detailed Architecture
@@ -89,15 +131,16 @@ cd messaging && npm install && node cli.js
 ![OpenClawd Detailed Architecture](docs/architecture-detailed.png)
 
 ### User Interfaces
-- **Desktop App** — Electron-based native app for macOS, Windows, Linux
+- **Desktop App** — Electron-based native app for macOS, Windows, Linux with voice input and token dashboard
 - **CLI** — `npx openclawd` for terminal-first workflows
-- **Messaging Gateway** — WhatsApp, Telegram, Signal, iMessage bots
+- **Channel Bots** — Telegram, Discord, WhatsApp (QR), Slack (Socket Mode)
 
 ### Backend (Server :3001)
-- **Chat API** — SSE-streamed responses for real-time conversation
-- **Provider Registry** — Unified interface to 20+ LLM providers
+- **Chat API** — SSE-streamed responses with model fallback
+- **Provider Registry** — Unified interface to 20+ LLM providers with automatic failover
+- **Channel Manager** — Bot lifecycle, session management, per-user conversation state
 - **MCP Manager** — Loader + catalog for 30+ MCP server integrations
-- **Auth Profiles & Usage** — API key management and usage tracking
+- **Auth Profiles & Usage** — API key management, token tracking, cost estimation
 - **Agent Loop & Memory** — Persistent conversation context and agent orchestration
 
 ### LLM Providers (20+)
