@@ -101,8 +101,8 @@ async function initializeLlmProviders() {
 app.use(cors({
   origin: function(origin, callback) {
     const allowed = [
-      'http://localhost:3001',
-      'http://127.0.0.1:3001',
+      `http://localhost:${PORT}`,
+      `http://127.0.0.1:${PORT}`,
       undefined
     ];
     if (!origin || allowed.includes(origin)) {
@@ -157,8 +157,7 @@ app.post('/api/chat', async (req, res) => {
     });
   }
 
-  req.setTimeout(600000);
-  req.on('timeout', () => {
+  res.setTimeout(600000, () => {
     console.log('[CHAT] Request timed out after 10 minutes, chatId:', chatId);
     if (!res.writableEnded) {
       res.write(`data: ${JSON.stringify({ type: 'error', message: 'Request timed out after 10 minutes' })}\n\n`);

@@ -165,7 +165,7 @@ export function addToolCall(name, input, status = 'running') {
       </div>
       <div class="tool-call-info">
         <div class="tool-call-name">${escapeHtml(name)}</div>
-        <div class="tool-call-status">${status === 'running' ? 'Running...' : 'Completed'}</div>
+        <div class="tool-call-status">${status === 'running' ? 'Running...' : status === 'error' ? 'Failed' : 'Completed'}</div>
       </div>
       <div class="tool-call-expand">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

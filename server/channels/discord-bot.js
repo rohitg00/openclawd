@@ -32,7 +32,7 @@ export class DiscordBot extends BaseChannel {
       });
 
       this.client.once('error', reject);
-      this.client.login(config.token);
+      this.client.login(config.token).catch(reject);
     });
 
     this.client.on('messageCreate', async (message) => {

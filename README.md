@@ -85,7 +85,7 @@ Each bot supports `/reset`, `/model <name>`, and `/status` commands. Per-user co
 
 ## Voice Input
 
-Click the mic button or press `Cmd+Shift+V` to dictate. Uses the browser Web Speech API — no external services needed. Supports continuous dictation with interim results.
+Click the mic button or press `Ctrl/Cmd+Shift+V` to dictate. Uses the browser Web Speech API — no external services needed. Supports continuous dictation with interim results.
 
 ## MCP Servers
 

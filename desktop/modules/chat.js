@@ -139,7 +139,7 @@ export function renderChatHistory(filter = '') {
 
 export function switchToChat(chatId) {
   if (state.isWaitingForResponse) {
-    window.electronAPI.abortCurrentRequest();
+    window.electronAPI?.abortCurrentRequest();
     state.isWaitingForResponse = false;
   }
 
@@ -179,7 +179,7 @@ export function deleteChat(chatId, event) {
 
 export function startNewChat() {
   if (state.isWaitingForResponse) {
-    window.electronAPI.abortCurrentRequest();
+    window.electronAPI?.abortCurrentRequest();
     state.isWaitingForResponse = false;
   }
 

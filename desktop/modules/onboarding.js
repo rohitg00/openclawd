@@ -12,18 +12,6 @@ export function hideOnboarding() {
   dom.homeInput.focus();
 }
 
-export function initOnboarding() {
-  document.getElementById('onboardingOverlay')?.addEventListener('click', (e) => {
-    if (e.target.matches('[data-action="skip"]')) {
-      hideOnboarding();
-    }
-    if (e.target.matches('[data-action="next"]')) {
-      const step = parseInt(e.target.dataset.step);
-      nextOnboardingStep(step);
-    }
-  });
-}
-
 export function nextOnboardingStep(step) {
   document.querySelectorAll('.onboarding-step').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.onboarding-dot').forEach(d => {

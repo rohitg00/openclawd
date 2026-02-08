@@ -59,18 +59,24 @@ export const dom = {
 };
 
 export function safeSetItem(key, value) {
-  try {
-    localStorage.setItem(key, value);
-  } catch (e) {
-    if (e.name === 'QuotaExceededError') {
-      const chats = JSON.parse(localStorage.getItem('allChats') || '[]');
-      if (chats.length > 1) {
-        chats.shift();
-        localStorage.setItem('allChats', JSON.stringify(chats));
-        localStorage.setItem(key, value);
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      localStorage.setItem(key, value);
+      return;
+    } catch (e) {
+      if (e.name === 'QuotaExceededError') {
+        const chats = JSON.parse(localStorage.getItem('allChats') || '[]');
+        if (chats.length > 1) {
+          chats.shift();
+          localStorage.setItem('allChats', JSON.stringify(chats));
+          continue;
+        }
       }
+      console.warn('localStorage save failed:', key);
+      return;
     }
   }
+  console.warn('localStorage quota exceeded after max retries:', key);
 }
 
 export function generateId() {
