@@ -12,7 +12,7 @@
     <!-- Left Sidebar - Chat History -->
     <aside class="left-sidebar" id="leftSidebar">
       <div class="left-sidebar-header">
-        <button class="new-chat-sidebar-btn" onclick="startNewChat()" title="New chat">
+        <button class="new-chat-sidebar-btn" data-action="newChat" title="New chat">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -24,6 +24,13 @@
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
+      </div>
+      <div class="chat-search-wrapper">
+        <svg class="chat-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="chat-search-input" id="chatSearchInput" placeholder="Search chats..." autocomplete="off">
       </div>
       <div class="chat-history-list" id="chatHistoryList">
         <!-- Chat history items will be added here -->
@@ -73,66 +80,18 @@
                     <polyline points="12 6 12 12 16 14"></polyline>
                   </svg>
                 </button>
+                <button type="button" class="control-btn mic-btn" id="homeMicBtn" data-target="homeInput" title="Voice input">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                    <line x1="12" y1="19" x2="12" y2="23"></line>
+                    <line x1="8" y1="23" x2="16" y2="23"></line>
+                  </svg>
+                </button>
               </div>
               <div class="right-controls">
-                <!-- Provider Selector Dropdown -->
-                <div class="dropdown-container" id="homeProviderDropdown">
-                  <button type="button" class="provider-selector">
-                    <span class="provider-label">Claude</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                  </button>
-                  <div class="dropdown-menu provider-menu">
-                    <div class="dropdown-item selected" data-value="claude">
-                      <div class="item-row">
-                        <span class="item-label">Claude</span>
-                        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                      </div>
-                      <span class="item-desc">Anthropic API</span>
-                    </div>
-                    <div class="dropdown-item" data-value="opencode">
-                      <div class="item-row">
-                        <span class="item-label">Opencode</span>
-                      </div>
-                      <span class="item-desc">Opencode SDK</span>
-                    </div>
-                  </div>
-                </div>
-                <!-- Model Selector Dropdown -->
-                <div class="dropdown-container" id="homeModelDropdown">
-                  <button type="button" class="model-selector">
-                    <span class="model-label">Sonnet 4.5</span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                  </button>
-                  <div class="dropdown-menu model-menu" data-provider="claude">
-                    <div class="dropdown-item" data-value="claude-opus-4-5-20250514">
-                      <div class="item-row">
-                        <span class="item-label">Opus 4.5</span>
-                      </div>
-                      <span class="item-desc">Most capable for complex work</span>
-                    </div>
-                    <div class="dropdown-item selected" data-value="claude-sonnet-4-5-20250514">
-                      <div class="item-row">
-                        <span class="item-label">Sonnet 4.5</span>
-                        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="20 6 9 17 4 12"></polyline>
-                        </svg>
-                      </div>
-                      <span class="item-desc">Best for everyday tasks</span>
-                    </div>
-                    <div class="dropdown-item" data-value="claude-haiku-4-5-20250514">
-                      <div class="item-row">
-                        <span class="item-label">Haiku 4.5</span>
-                      </div>
-                      <span class="item-desc">Fastest for quick answers</span>
-                    </div>
-                  </div>
-                </div>
+                <div class="dropdown-container" id="homeProviderDropdown"></div>
+                <div class="dropdown-container" id="homeModelDropdown"></div>
                 <button type="submit" class="send-btn" id="homeSendBtn" disabled>
                   <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="19" x2="12" y2="5"></line>
@@ -159,7 +118,7 @@
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </button>
-          <button class="new-chat-btn" onclick="startNewChat()" title="New chat">
+          <button class="new-chat-btn" data-action="newChat" title="New chat">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -197,66 +156,18 @@
                         <polyline points="12 6 12 12 16 14"></polyline>
                       </svg>
                     </button>
+                    <button type="button" class="control-btn mic-btn" id="chatMicBtn" data-target="messageInput" title="Voice input">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                        <line x1="12" y1="19" x2="12" y2="23"></line>
+                        <line x1="8" y1="23" x2="16" y2="23"></line>
+                      </svg>
+                    </button>
                   </div>
                   <div class="right-controls">
-                    <!-- Provider Selector Dropdown -->
-                    <div class="dropdown-container" id="chatProviderDropdown">
-                      <button type="button" class="provider-selector">
-                        <span class="provider-label">Claude</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                      </button>
-                      <div class="dropdown-menu provider-menu">
-                        <div class="dropdown-item selected" data-value="claude">
-                          <div class="item-row">
-                            <span class="item-label">Claude</span>
-                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                          </div>
-                          <span class="item-desc">Anthropic API</span>
-                        </div>
-                        <div class="dropdown-item" data-value="opencode">
-                          <div class="item-row">
-                            <span class="item-label">Opencode</span>
-                          </div>
-                          <span class="item-desc">Opencode SDK</span>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- Model Selector Dropdown -->
-                    <div class="dropdown-container" id="chatModelDropdown">
-                      <button type="button" class="model-selector">
-                        <span class="model-label">Sonnet 4.5</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                      </button>
-                      <div class="dropdown-menu model-menu" data-provider="claude">
-                        <div class="dropdown-item" data-value="claude-opus-4-5-20250514">
-                          <div class="item-row">
-                            <span class="item-label">Opus 4.5</span>
-                          </div>
-                          <span class="item-desc">Most capable for complex work</span>
-                        </div>
-                        <div class="dropdown-item selected" data-value="claude-sonnet-4-5-20250514">
-                          <div class="item-row">
-                            <span class="item-label">Sonnet 4.5</span>
-                            <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                          </div>
-                          <span class="item-desc">Best for everyday tasks</span>
-                        </div>
-                        <div class="dropdown-item" data-value="claude-haiku-4-5-20250514">
-                          <div class="item-row">
-                            <span class="item-label">Haiku 4.5</span>
-                          </div>
-                          <span class="item-desc">Fastest for quick answers</span>
-                        </div>
-                      </div>
-                    </div>
+                    <div class="dropdown-container" id="chatProviderDropdown"></div>
+                    <div class="dropdown-container" id="chatModelDropdown"></div>
                     <button type="submit" class="send-btn" id="chatSendBtn" disabled>
                       <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                         <line x1="12" y1="19" x2="12" y2="5"></line>
@@ -351,18 +262,20 @@
         <button class="tab-btn active" data-tab="api-keys">API Keys</button>
         <button class="tab-btn" data-tab="mcp-servers">MCP Servers</button>
         <button class="tab-btn" data-tab="general">General</button>
+        <button class="tab-btn" data-tab="channels">Channels</button>
+        <button class="tab-btn" data-tab="usage">Usage</button>
       </div>
 
       <div class="settings-content">
         <!-- API Keys Tab -->
         <div class="tab-content active" id="api-keys-tab">
-          <div class="settings-section">
+          <div class="settings-section settings-card">
             <h3>LLM Provider API Keys</h3>
             <p class="settings-desc">Add your API keys to enable different providers. Keys are stored locally.</p>
 
             <div class="api-key-group">
               <label>
-                <span class="provider-name">Anthropic (Claude)</span>
+                <span class="provider-name"><span class="provider-status-dot" id="anthropic-dot"></span>Anthropic (Claude)</span>
                 <span class="provider-status" id="anthropic-status"></span>
               </label>
               <div class="input-row">
@@ -378,7 +291,7 @@
 
             <div class="api-key-group">
               <label>
-                <span class="provider-name">OpenAI (GPT-4)</span>
+                <span class="provider-name"><span class="provider-status-dot" id="openai-dot"></span>OpenAI (GPT-4)</span>
                 <span class="provider-status" id="openai-status"></span>
               </label>
               <div class="input-row">
@@ -394,7 +307,7 @@
 
             <div class="api-key-group">
               <label>
-                <span class="provider-name">Google (Gemini)</span>
+                <span class="provider-name"><span class="provider-status-dot" id="google-dot"></span>Google (Gemini)</span>
                 <span class="provider-status" id="google-status"></span>
               </label>
               <div class="input-row">
@@ -410,7 +323,7 @@
 
             <div class="api-key-group">
               <label>
-                <span class="provider-name">Groq (Fast Llama)</span>
+                <span class="provider-name"><span class="provider-status-dot" id="groq-dot"></span>Groq (Fast Llama)</span>
                 <span class="provider-status" id="groq-status"></span>
               </label>
               <div class="input-row">
@@ -426,7 +339,7 @@
 
             <div class="api-key-group">
               <label>
-                <span class="provider-name">OpenRouter (200+ models)</span>
+                <span class="provider-name"><span class="provider-status-dot" id="openrouter-dot"></span>OpenRouter (200+ models)</span>
                 <span class="provider-status" id="openrouter-status"></span>
               </label>
               <div class="input-row">
@@ -496,7 +409,7 @@
 
         <!-- MCP Servers Tab -->
         <div class="tab-content" id="mcp-servers-tab">
-          <div class="settings-section">
+          <div class="settings-section settings-card">
             <div class="section-header">
               <h3>MCP Servers</h3>
               <p class="settings-desc">Connect to external tools via Model Context Protocol. Config saved to <code>mcp-servers.json</code></p>
@@ -593,7 +506,7 @@
 
         <!-- General Tab -->
         <div class="tab-content" id="general-tab">
-          <div class="settings-section">
+          <div class="settings-section settings-card">
             <h3>General Settings</h3>
 
             <div class="setting-item">
@@ -633,9 +546,39 @@
                 <span>Stream responses in real-time</span>
               </label>
             </div>
+
+            <div class="setting-item">
+              <label class="checkbox-label">
+                <input type="checkbox" id="enableFallback">
+                <span>Enable automatic fallback</span>
+              </label>
+            </div>
+
+            <div class="setting-item" id="fallbackSettings" style="display: none;">
+              <label>
+                <span>Fallback Provider</span>
+                <select id="fallbackProvider">
+                  <option value="">Select provider...</option>
+                  <option value="claude">Claude (Anthropic)</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="google">Google Gemini</option>
+                  <option value="groq">Groq</option>
+                  <option value="ollama">Ollama</option>
+                  <option value="openrouter">OpenRouter</option>
+                  <option value="deepseek">DeepSeek</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="setting-item" id="fallbackModelSetting" style="display: none;">
+              <label>
+                <span>Fallback Model</span>
+                <input type="text" id="fallbackModel" placeholder="e.g., openai/gpt-4o">
+              </label>
+            </div>
           </div>
 
-          <div class="settings-section">
+          <div class="settings-section settings-card">
             <h3>Server Connection</h3>
             <div class="setting-item">
               <label>
@@ -648,6 +591,14 @@
               <span class="status-text">Checking...</span>
             </div>
           </div>
+        </div>
+
+        <!-- Channels Tab -->
+        <div class="tab-content" id="channels-tab">
+        </div>
+
+        <!-- Usage Tab -->
+        <div class="tab-content" id="usage-tab">
         </div>
       </div>
 
@@ -704,8 +655,8 @@
         <h2>Welcome to OpenClawd</h2>
         <p>Your desktop AI chat with 20+ LLM providers and MCP integrations. Let's get you set up in under a minute.</p>
         <div class="onboarding-actions">
-          <button class="btn-secondary" onclick="skipOnboarding()">Skip Setup</button>
-          <button class="btn-primary" onclick="nextOnboardingStep(2)">Get Started</button>
+          <button class="btn-secondary" data-action="skipOnboarding">Skip Setup</button>
+          <button class="btn-primary" data-action="nextOnboardingStep" data-step="2">Get Started</button>
         </div>
       </div>
 
@@ -743,8 +694,8 @@
           </div>
         </div>
         <div class="onboarding-actions">
-          <button class="btn-secondary" onclick="nextOnboardingStep(3)">Skip</button>
-          <button class="btn-primary" onclick="saveOnboardingKeys()">Save & Continue</button>
+          <button class="btn-secondary" data-action="nextOnboardingStep" data-step="3">Skip</button>
+          <button class="btn-primary" data-action="saveOnboardingKeys">Save & Continue</button>
         </div>
       </div>
 
@@ -783,13 +734,14 @@
           </label>
         </div>
         <div class="onboarding-actions">
-          <button class="btn-secondary" onclick="skipOnboarding()">Skip</button>
-          <button class="btn-primary" onclick="saveOnboardingMcp()">Finish Setup</button>
+          <button class="btn-secondary" data-action="skipOnboarding">Skip</button>
+          <button class="btn-primary" data-action="saveOnboardingMcp">Finish Setup</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

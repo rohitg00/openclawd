@@ -8,10 +8,15 @@
     "dev": "node server.js"
   },
   "dependencies": {
-    "express": "^5.2.1",
     "@anthropic-ai/claude-agent-sdk": "^0.2.7",
     "@opencode-ai/sdk": "latest",
+    "@slack/bolt": "^4.6.0",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "cors": "^2.8.5",
+    "discord.js": "^14.25.1",
     "dotenv": "^16.4.5",
-    "cors": "^2.8.5"
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.5.0",
+    "node-telegram-bot-api": "^0.67.0"
   }
 }

@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-const SERVER_URL = 'http://localhost:3001';
+const SERVER_PORT = process.env.OPENCLAWD_SERVER_PORT || '3001';
+const SERVER_URL = `http://localhost:${SERVER_PORT}`;
 
 // Store the current abort controller for cancelling requests
 let currentAbortController = null;
