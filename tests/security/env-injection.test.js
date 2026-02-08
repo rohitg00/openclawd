@@ -39,7 +39,7 @@ describe('env var injection prevention', () => {
     unlinkSync(cfg);
   });
 
-  it('allows safe system vars (HOME, PATH, USER)', () => {
+  it('allows safe system var HOME', () => {
     const originalHome = process.env.HOME;
     process.env.HOME = '/home/testuser';
 

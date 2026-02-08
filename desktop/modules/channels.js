@@ -1,5 +1,6 @@
 import { API_BASE } from './state.js';
 import { showToast } from './toast.js';
+import { escapeHtml } from './ui.js';
 
 const CHANNEL_ICONS = {
   telegram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M21.198 2.433a2.242 2.242 0 0 0-1.022.215l-16.5 7.5a2.25 2.25 0 0 0 .126 4.073l3.9 1.205 2.07 6.094a1.096 1.096 0 0 0 1.85.278l2.45-2.786 4.224 3.233a2.246 2.246 0 0 0 3.458-1.36l3.375-16.5a2.25 2.25 0 0 0-2.931-2.652z"/></svg>',
@@ -26,6 +27,10 @@ export async function initChannelsTab() {
       fetch(`${API_BASE}/api/channels/status`),
       fetch(`${API_BASE}/api/channels/sessions`)
     ]);
+
+    if (!statusRes.ok || !sessionsRes.ok) {
+      throw new Error('Failed to fetch channel data');
+    }
 
     const statusData = await statusRes.json();
     const sessionsData = await sessionsRes.json();
@@ -151,10 +156,10 @@ function renderSessions(container, sessions) {
 
   const rows = sessions.map(s => `
     <tr>
-      <td>${s.platform}</td>
-      <td>${s.userId.substring(0, 12)}...</td>
-      <td>${s.messageCount}</td>
-      <td>${new Date(s.lastActivity).toLocaleTimeString()}</td>
+      <td>${escapeHtml(s.platform)}</td>
+      <td>${escapeHtml(s.userId.substring(0, 12))}...</td>
+      <td>${escapeHtml(String(s.messageCount))}</td>
+      <td>${escapeHtml(new Date(s.lastActivity).toLocaleTimeString())}</td>
     </tr>
   `).join('');
 

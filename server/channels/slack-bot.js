@@ -37,8 +37,8 @@ export class SlackBot extends BaseChannel {
           await say(chunk);
         }
       } catch (error) {
-        console.error('[Slack] Error:', error.message);
-        await say(`Error: ${error.message}`);
+        console.error('[Slack] Error:', error);
+        await say('Sorry, an error occurred while processing your message.');
       }
     });
 
@@ -56,8 +56,8 @@ export class SlackBot extends BaseChannel {
           await say({ text: chunk, thread_ts: event.ts });
         }
       } catch (error) {
-        console.error('[Slack] Error:', error.message);
-        await say({ text: `Error: ${error.message}`, thread_ts: event.ts });
+        console.error('[Slack] Error:', error);
+        await say({ text: 'Sorry, an error occurred while processing your message.', thread_ts: event.ts });
       }
     });
 

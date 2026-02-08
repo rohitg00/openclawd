@@ -1,5 +1,6 @@
 import { API_BASE } from './state.js';
 import { showToast } from './toast.js';
+import { escapeHtml } from './ui.js';
 import { initUsageTab } from './usage-dashboard.js';
 import { initChannelsTab } from './channels.js';
 
@@ -174,8 +175,8 @@ async function loadMcpServers() {
     listEl.innerHTML = data.servers.map(server => `
       <div class="mcp-server-item">
         <div class="mcp-server-info">
-          <span class="mcp-server-name">${server.name}</span>
-          <span class="mcp-server-desc">${server.type} · ${server.enabled ? 'Enabled' : 'Disabled'}</span>
+          <span class="mcp-server-name">${escapeHtml(server.name)}</span>
+          <span class="mcp-server-desc">${escapeHtml(server.type)} · ${server.enabled ? 'Enabled' : 'Disabled'}</span>
         </div>
         <div class="mcp-server-actions">
           <button class="mcp-server-toggle ${server.enabled ? 'enabled' : ''}" data-server="${server.name}" title="${server.enabled ? 'Disable' : 'Enable'}"></button>
@@ -270,11 +271,11 @@ function renderCatalog(servers) {
     <div class="catalog-item ${isInstalled ? 'installed' : ''}">
       <div class="catalog-item-info">
         <div class="catalog-item-name">
-          ${server.name}
+          ${escapeHtml(server.name)}
           ${!server.requiresAuth ? '<span class="catalog-item-badge no-auth">No API key</span>' : '<span class="catalog-item-badge requires-auth">Requires API key</span>'}
         </div>
-        <div class="catalog-item-desc">${server.description || ''}</div>
-        <div class="catalog-item-package">${server.package || ''}</div>
+        <div class="catalog-item-desc">${escapeHtml(server.description || '')}</div>
+        <div class="catalog-item-package">${escapeHtml(server.package || '')}</div>
       </div>
       <button class="install-btn ${isInstalled ? 'installed' : ''}" data-server="${server.id}" ${isInstalled ? 'disabled' : ''}>
         ${isInstalled ? '&#10003; Installed' : 'Install'}

@@ -52,9 +52,11 @@ function enhanceCodeBlocks(container) {
 export function renderMarkdownContainer(container) {
   const rawContent = container.dataset.rawContent || '';
   marked.setOptions({ breaks: true, gfm: true });
-  container.innerHTML = typeof DOMPurify !== 'undefined'
-    ? DOMPurify.sanitize(marked.parse(rawContent))
-    : marked.parse(rawContent);
+  if (typeof DOMPurify === 'undefined') {
+    container.textContent = rawContent;
+    return;
+  }
+  container.innerHTML = DOMPurify.sanitize(marked.parse(rawContent));
   enhanceCodeBlocks(container);
 }
 
@@ -69,9 +71,11 @@ export function renderMarkdown(contentDiv) {
     contentDiv.appendChild(markdownContainer);
   }
 
-  markdownContainer.innerHTML = typeof DOMPurify !== 'undefined'
-    ? DOMPurify.sanitize(marked.parse(rawContent))
-    : marked.parse(rawContent);
+  if (typeof DOMPurify === 'undefined') {
+    markdownContainer.textContent = rawContent;
+    return;
+  }
+  markdownContainer.innerHTML = DOMPurify.sanitize(marked.parse(rawContent));
   enhanceCodeBlocks(markdownContainer);
 }
 

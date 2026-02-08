@@ -12,6 +12,10 @@ export async function initUsageTab() {
       fetch(`${API_BASE}/api/llm/usage/history`)
     ]);
 
+    if (!usageRes.ok || !historyRes.ok) {
+      throw new Error('Failed to fetch usage data');
+    }
+
     const usageData = await usageRes.json();
     const historyData = await historyRes.json();
 

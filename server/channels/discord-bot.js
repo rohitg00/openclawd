@@ -12,7 +12,7 @@ export class DiscordBot extends BaseChannel {
   async start(config) {
     if (!config.token) throw new Error('Discord bot token is required');
 
-    const { Client, GatewayIntentBits } = await import('discord.js');
+    const { Client, GatewayIntentBits, Partials } = await import('discord.js');
 
     this.client = new Client({
       intents: [
@@ -20,7 +20,8 @@ export class DiscordBot extends BaseChannel {
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.DirectMessages
-      ]
+      ],
+      partials: [Partials.Channel, Partials.Message]
     });
 
     await new Promise((resolve, reject) => {

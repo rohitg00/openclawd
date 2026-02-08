@@ -427,7 +427,7 @@ export async function handleSendMessage(e) {
                   }
 
                   for (const block of data.message.content) {
-                    if (block.type === 'tool_use' && block.name === 'TodoWrite') {
+                    if (block.type === 'tool_use' && block.name === 'TodoWrite' && block.input?.todos) {
                       updateTodos(block.input.todos);
                     }
                   }
@@ -436,6 +436,7 @@ export async function handleSendMessage(e) {
 
               scrollToBottom();
             } catch (parseError) {
+              console.debug('[Chat] Failed to parse SSE data:', parseError.message);
             }
           }
         }

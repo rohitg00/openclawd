@@ -15,7 +15,7 @@ export class WhatsAppBot extends BaseChannel {
   async start(config) {
     const baileys = await import('@whiskeysockets/baileys');
     const makeWASocket = baileys.default || baileys.makeWASocket;
-    const { useMultiFileAuthState, DisconnectReason } = baileys;
+    const { useMultiFileAuthState, DisconnectReason, jidNormalizedUser } = baileys;
 
     this.authDir = config.authDir || path.join(process.cwd(), 'whatsapp-auth');
     if (!existsSync(this.authDir)) {
@@ -48,8 +48,8 @@ export class WhatsAppBot extends BaseChannel {
       if (connection === 'close') {
         const reason = lastDisconnect?.error?.output?.statusCode;
         if (reason !== DisconnectReason.loggedOut) {
-          console.log('[WhatsApp] Reconnecting...');
-          this.start(config);
+          console.log('[WhatsApp] Reconnecting in 5s...');
+          setTimeout(() => this.start(config), 5000);
         } else {
           this.active = false;
           console.log('[WhatsApp] Logged out');
@@ -72,7 +72,11 @@ export class WhatsAppBot extends BaseChannel {
         const userId = isGroup ? msg.key.participant : jid;
 
         if (isGroup) {
-          const isMentioned = msg.message.extendedTextMessage?.contextInfo?.mentionedJid?.includes(this.sock.user?.id);
+          const mentionedJids = msg.message.extendedTextMessage?.contextInfo?.mentionedJid || [];
+          const botJid = this.sock.user?.id;
+          const isMentioned = botJid && mentionedJids.some(jid => {
+            try { return jidNormalizedUser(jid) === jidNormalizedUser(botJid); } catch { return false; }
+          });
           if (!isMentioned) continue;
         }
 
@@ -89,8 +93,6 @@ export class WhatsAppBot extends BaseChannel {
         }
       }
     });
-
-    this.active = true;
   }
 
   async stop() {

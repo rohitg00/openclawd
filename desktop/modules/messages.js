@@ -94,8 +94,8 @@ export function addInlineToolCall(contentDiv, toolName, toolInput, toolId) {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
       </svg>
-      <span class="tool-name">${toolName}</span>
-      <span class="tool-preview">${inputPreview}</span>
+      <span class="tool-name">${escapeHtml(toolName)}</span>
+      <span class="tool-preview">${escapeHtml(inputPreview)}</span>
       <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <polyline points="6 9 12 15 18 9"></polyline>
       </svg>
@@ -162,7 +162,7 @@ export function addToolCall(name, input, status = 'running') {
         </svg>
       </div>
       <div class="tool-call-info">
-        <div class="tool-call-name">${name}</div>
+        <div class="tool-call-name">${escapeHtml(name)}</div>
         <div class="tool-call-status">${status === 'running' ? 'Running...' : 'Completed'}</div>
       </div>
       <div class="tool-call-expand">
