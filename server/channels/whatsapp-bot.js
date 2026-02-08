@@ -13,6 +13,11 @@ export class WhatsAppBot extends BaseChannel {
   }
 
   async start(config) {
+    if (this.sock) {
+      this.sock.end();
+      this.sock = null;
+    }
+
     const baileys = await import('@whiskeysockets/baileys');
     const makeWASocket = baileys.default || baileys.makeWASocket;
     const { useMultiFileAuthState, DisconnectReason, jidNormalizedUser } = baileys;
@@ -88,8 +93,8 @@ export class WhatsAppBot extends BaseChannel {
             await this.sock.sendMessage(jid, { text: chunk });
           }
         } catch (error) {
-          console.error('[WhatsApp] Error:', error.message);
-          await this.sock.sendMessage(jid, { text: `Error: ${error.message}` });
+          console.error('[WhatsApp] Error:', error);
+          await this.sock.sendMessage(jid, { text: 'Sorry, an error occurred while processing your message.' });
         }
       }
     });

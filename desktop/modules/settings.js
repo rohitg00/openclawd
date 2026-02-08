@@ -1,6 +1,10 @@
 import { API_BASE } from './state.js';
 import { showToast } from './toast.js';
 import { escapeHtml } from './ui.js';
+
+function escapeAttr(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 import { initUsageTab } from './usage-dashboard.js';
 import { initChannelsTab } from './channels.js';
 
@@ -160,6 +164,7 @@ async function loadMcpServers() {
 
   try {
     const response = await fetch(`${API_BASE}/api/mcp/servers`);
+    if (!response.ok) throw new Error('Failed to load servers');
     const data = await response.json();
 
     if (data.servers.length === 0) {
@@ -179,8 +184,8 @@ async function loadMcpServers() {
           <span class="mcp-server-desc">${escapeHtml(server.type)} · ${server.enabled ? 'Enabled' : 'Disabled'}</span>
         </div>
         <div class="mcp-server-actions">
-          <button class="mcp-server-toggle ${server.enabled ? 'enabled' : ''}" data-server="${server.name}" title="${server.enabled ? 'Disable' : 'Enable'}"></button>
-          <button class="mcp-server-delete" data-server="${server.name}" title="Remove server">
+          <button class="mcp-server-toggle ${server.enabled ? 'enabled' : ''}" data-server="${escapeAttr(server.name)}" title="${server.enabled ? 'Disable' : 'Enable'}"></button>
+          <button class="mcp-server-delete" data-server="${escapeAttr(server.name)}" title="Remove server">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
               <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
             </svg>
@@ -196,7 +201,8 @@ async function loadMcpServers() {
         const endpoint = isEnabled ? 'disable' : 'enable';
 
         try {
-          await fetch(`${API_BASE}/api/mcp/servers/${serverName}/${endpoint}`, { method: 'PUT' });
+          const res = await fetch(`${API_BASE}/api/mcp/servers/${serverName}/${endpoint}`, { method: 'PUT' });
+          if (!res.ok) throw new Error('Toggle failed');
           toggle.classList.toggle('enabled');
           const desc = toggle.closest('.mcp-server-item').querySelector('.mcp-server-desc');
           const type = desc.textContent.split(' · ')[0];
@@ -277,7 +283,7 @@ function renderCatalog(servers) {
         <div class="catalog-item-desc">${escapeHtml(server.description || '')}</div>
         <div class="catalog-item-package">${escapeHtml(server.package || '')}</div>
       </div>
-      <button class="install-btn ${isInstalled ? 'installed' : ''}" data-server="${server.id}" ${isInstalled ? 'disabled' : ''}>
+      <button class="install-btn ${isInstalled ? 'installed' : ''}" data-server="${escapeAttr(server.id)}" ${isInstalled ? 'disabled' : ''}>
         ${isInstalled ? '&#10003; Installed' : 'Install'}
       </button>
     </div>
@@ -412,11 +418,8 @@ function initAddServerForm() {
 
       if (response.ok) {
         addServerForm?.classList.add('hidden');
-        document.getElementById('serverName').value = '';
-        document.getElementById('serverCommand').value = '';
-        document.getElementById('serverArgs').value = '';
-        document.getElementById('serverUrl').value = '';
-        document.getElementById('serverEnv').value = '';
+        const fields = ['serverName', 'serverCommand', 'serverArgs', 'serverUrl', 'serverEnv'];
+        fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
         loadMcpServers();
       } else {
         const data = await response.json();
@@ -444,11 +447,11 @@ function initJsonEditor() {
     try {
       const response = await fetch(`${API_BASE}/api/mcp/config`);
       const data = await response.json();
-      mcpJsonEditor.value = JSON.stringify(data.config || {}, null, 2);
+      if (mcpJsonEditor) mcpJsonEditor.value = JSON.stringify(data.config || {}, null, 2);
       jsonEditorSection?.classList.remove('hidden');
     } catch (err) {
       console.error('Failed to load MCP config:', err);
-      mcpJsonEditor.value = '{\n  \n}';
+      if (mcpJsonEditor) mcpJsonEditor.value = '{\n  \n}';
       jsonEditorSection?.classList.remove('hidden');
     }
   });
@@ -522,7 +525,7 @@ function initSaveSettings(saveSettingsBtn, closeSettings) {
       if (v && !v.includes('\u2022\u2022\u2022\u2022')) keysToSave[k] = v;
     }
 
-    if (Object.keys(keysToSave).length === 0 && !general.backendUrl) {
+    if (Object.keys(keysToSave).length === 0 && !general.backendUrl && !general.fallbackProvider && !general.fallbackModel) {
       closeSettings();
       return;
     }

@@ -50,7 +50,7 @@ export function loadChat(chat) {
       contentDiv.textContent = msgData.content;
     } else if (msgData.class.includes('assistant')) {
       if (msgData.html) {
-        contentDiv.innerHTML = msgData.html;
+        contentDiv.innerHTML = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(msgData.html) : '';
       } else {
         renderMarkdown(contentDiv);
       }
@@ -295,7 +295,9 @@ export async function handleSendMessage(e) {
     heartbeatChecker = setInterval(() => {
       const timeSinceLastHeartbeat = Date.now() - lastHeartbeat;
       if (timeSinceLastHeartbeat > heartbeatTimeout) {
-        console.warn('[Chat] No data received for 5 minutes - connection may be lost');
+        console.warn('[Chat] No data received for 5 minutes - aborting connection');
+        clearInterval(heartbeatChecker);
+        stopCurrentQuery();
       }
     }, 30000);
 
@@ -399,8 +401,8 @@ export async function handleSendMessage(e) {
                   showToast(`Switched to ${data.to}`, 'info');
                 });
               } else if (data.type === 'usage') {
-                totalInputTokens = data.inputTokens || totalInputTokens;
-                totalOutputTokens = data.outputTokens || totalOutputTokens;
+                totalInputTokens = data.inputTokens ?? totalInputTokens;
+                totalOutputTokens = data.outputTokens ?? totalOutputTokens;
               } else if (data.type === 'assistant' && data.message) {
                 if (data.message.content && Array.isArray(data.message.content)) {
                   for (const block of data.message.content) {

@@ -143,8 +143,10 @@ export function updateInlineToolResult(toolId, result) {
   }
 }
 
+let toolCallCounter = 0;
+
 export function addToolCall(name, input, status = 'running') {
-  const id = 'tool_' + Date.now();
+  const id = 'tool_' + Date.now() + '_' + (toolCallCounter++);
   const toolCall = { id, name, input, status, result: null };
   state.toolCalls.push(toolCall);
 

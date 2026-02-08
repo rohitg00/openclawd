@@ -1,4 +1,5 @@
 import { API_BASE } from './state.js';
+import { escapeHtml } from './ui.js';
 
 export async function initUsageTab() {
   const container = document.getElementById('usage-tab');
@@ -89,7 +90,7 @@ function getLast7DaysData(days) {
   for (let i = 6; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().slice(0, 10);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
     let tokens = 0, cost = 0;
     for (const e of days) {
@@ -113,7 +114,7 @@ function renderProviderBreakdown(container, summary) {
 
   const rows = summary.map(s => `
     <tr>
-      <td>${s.provider}</td>
+      <td>${escapeHtml(s.provider)}</td>
       <td>${s.inputTokens.toLocaleString()}</td>
       <td>${s.outputTokens.toLocaleString()}</td>
       <td>$${s.estimatedCost.toFixed(4)}</td>

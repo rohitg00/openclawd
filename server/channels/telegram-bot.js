@@ -17,6 +17,7 @@ export class TelegramBot extends BaseChannel {
 
     const me = await this.bot.getMe();
     this.username = me.username;
+    this.botId = me.id;
     console.log(`[Telegram] Bot started as @${this.username}`);
 
     this.bot.on('message', async (msg) => {
@@ -28,7 +29,7 @@ export class TelegramBot extends BaseChannel {
 
       if (isGroup) {
         const mentioned = msg.text.includes(`@${this.username}`) ||
-          (msg.reply_to_message && msg.reply_to_message.from?.id === this.bot.options?.id);
+          (msg.reply_to_message && msg.reply_to_message.from?.id === this.botId);
         if (!mentioned) return;
       }
 
@@ -50,8 +51,8 @@ export class TelegramBot extends BaseChannel {
           });
         }
       } catch (error) {
-        console.error('[Telegram] Error:', error.message);
-        await this.bot.sendMessage(chatId, `Error: ${error.message}`);
+        console.error('[Telegram] Error:', error);
+        await this.bot.sendMessage(chatId, 'Sorry, an error occurred while processing your message.');
       }
     });
 
@@ -65,6 +66,7 @@ export class TelegramBot extends BaseChannel {
     }
     this.active = false;
     this.username = null;
+    this.botId = null;
     console.log('[Telegram] Bot stopped');
   }
 

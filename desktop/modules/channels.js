@@ -157,7 +157,7 @@ function renderSessions(container, sessions) {
   const rows = sessions.map(s => `
     <tr>
       <td>${escapeHtml(s.platform)}</td>
-      <td>${escapeHtml(s.userId.substring(0, 12))}...</td>
+      <td>${escapeHtml(String(s.userId || '').substring(0, 12))}...</td>
       <td>${escapeHtml(String(s.messageCount))}</td>
       <td>${escapeHtml(new Date(s.lastActivity).toLocaleTimeString())}</td>
     </tr>

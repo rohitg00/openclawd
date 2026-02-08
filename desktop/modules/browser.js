@@ -1,5 +1,9 @@
 import { state, dom } from './state.js';
-import { scrollToBottom } from './ui.js';
+import { escapeHtml, scrollToBottom } from './ui.js';
+
+function escapeAttr(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 export function extractBrowserUrl(text) {
   const regex = /https:\/\/live\.anchorbrowser\.io\?sessionId=([a-f0-9-]+)/i;
@@ -58,14 +62,14 @@ export function addInlineBrowserEmbed(contentDiv, url, sessionId) {
     </div>
     <div class="browser-embed-content">
       <iframe
-        src="${url}"
+        src="${escapeAttr(url)}"
         class="browser-iframe"
         allow="clipboard-read; clipboard-write; camera; microphone"
         sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
       ></iframe>
     </div>
     <div class="browser-embed-footer">
-      <span class="browser-url">${url}</span>
+      <span class="browser-url">${escapeHtml(url)}</span>
       <button class="browser-copy-url" title="Copy URL">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -152,7 +156,7 @@ function showBrowserInSidebar(url, sessionId) {
       </div>
       <div class="browser-sidebar-content">
         <iframe
-          src="${url}"
+          src="${escapeAttr(url)}"
           class="browser-sidebar-iframe"
           allow="clipboard-read; clipboard-write; camera; microphone"
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
