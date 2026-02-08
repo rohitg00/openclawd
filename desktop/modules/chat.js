@@ -50,7 +50,11 @@ export function loadChat(chat) {
       contentDiv.textContent = msgData.content;
     } else if (msgData.class.includes('assistant')) {
       if (msgData.html) {
-        contentDiv.innerHTML = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(msgData.html) : '';
+        if (typeof DOMPurify !== 'undefined') {
+          contentDiv.innerHTML = DOMPurify.sanitize(msgData.html);
+        } else {
+          contentDiv.textContent = msgData.content || '[Content unavailable - sanitizer not loaded]';
+        }
       } else {
         renderMarkdown(contentDiv);
       }
@@ -323,8 +327,7 @@ export async function handleSendMessage(e) {
           if (totalTk > 0) {
             const badge = document.createElement('span');
             badge.className = 'token-badge';
-            const costEst = ((totalInputTokens * 3 + totalOutputTokens * 15) / 1000000).toFixed(4);
-            badge.textContent = `${totalTk.toLocaleString()} tokens · $${costEst}`;
+            badge.textContent = `${totalTk.toLocaleString()} tokens`;
             contentDiv.appendChild(badge);
           }
           break;

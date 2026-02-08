@@ -107,9 +107,14 @@ function createChannelCard(channelId, status) {
 async function toggleChannel(channelId, isCurrentlyActive) {
   if (isCurrentlyActive) {
     try {
-      await fetch(`${API_BASE}/api/channels/${channelId}/stop`, { method: 'POST' });
-      showToast(`${CHANNEL_LABELS[channelId]} stopped`, 'info');
-      initChannelsTab();
+      const res = await fetch(`${API_BASE}/api/channels/${channelId}/stop`, { method: 'POST' });
+      if (res.ok) {
+        showToast(`${CHANNEL_LABELS[channelId]} stopped`, 'info');
+        initChannelsTab();
+      } else {
+        const data = await res.json();
+        showToast(data.error || 'Failed to stop', 'error');
+      }
     } catch (err) {
       showToast(`Failed to stop ${CHANNEL_LABELS[channelId]}`, 'error');
     }
@@ -159,7 +164,7 @@ function renderSessions(container, sessions) {
       <td>${escapeHtml(s.platform)}</td>
       <td>${escapeHtml(String(s.userId || '').substring(0, 12))}...</td>
       <td>${escapeHtml(String(s.messageCount))}</td>
-      <td>${escapeHtml(new Date(s.lastActivity).toLocaleTimeString())}</td>
+      <td>${escapeHtml(s.lastActivity ? new Date(s.lastActivity).toLocaleTimeString() : '—')}</td>
     </tr>
   `).join('');
 

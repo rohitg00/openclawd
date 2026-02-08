@@ -48,7 +48,7 @@ export class BaseChannel {
 
       for await (const chunk of provider.query({
         prompt: conversationPrompt,
-        chatId: `${this.platform}_${userId}_${Date.now()}`,
+        chatId: `${this.platform}_${userId}_${session.createdAt}`,
         userId: `${this.platform}:${userId}`,
         mcpServers: this.mcpServers,
         model: modelId,
@@ -68,7 +68,7 @@ export class BaseChannel {
       return fullResponse;
     } catch (error) {
       console.error(`[${this.platform}] Error handling message:`, error.message);
-      return `Error: ${error.message}`;
+      return 'Sorry, an error occurred while processing your message.';
     }
   }
 

@@ -13,7 +13,7 @@ export function initShortcuts() {
       return;
     }
 
-    if (mod && e.shiftKey && e.key === 'E') {
+    if (mod && e.shiftKey && e.key.toLowerCase() === 'e') {
       e.preventDefault();
       state.thinkingMode = state.thinkingMode === 'normal' ? 'extended' : 'normal';
       document.querySelectorAll('.thinking-btn').forEach(b => {
@@ -22,13 +22,13 @@ export function initShortcuts() {
       return;
     }
 
-    if (mod && e.shiftKey && e.key === 'S') {
+    if (mod && e.shiftKey && e.key.toLowerCase() === 's') {
       e.preventDefault();
       toggleSidebar();
       return;
     }
 
-    if (mod && e.shiftKey && e.key === 'V') {
+    if (mod && e.shiftKey && e.key.toLowerCase() === 'v') {
       e.preventDefault();
       toggleVoiceInput();
       return;

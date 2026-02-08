@@ -173,7 +173,11 @@ function showBrowserInSidebar(url, sessionId) {
     });
 
     const toolCallsSection = dom.sidebar.querySelector('.sidebar-section:last-child');
-    dom.sidebar.insertBefore(browserSection, toolCallsSection);
+    if (toolCallsSection) {
+      dom.sidebar.insertBefore(browserSection, toolCallsSection);
+    } else {
+      dom.sidebar.appendChild(browserSection);
+    }
   } else {
     const iframe = browserSection.querySelector('.browser-sidebar-iframe');
     if (iframe) {

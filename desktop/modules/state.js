@@ -86,8 +86,8 @@ export function saveState() {
 
   const chatData = {
     id: state.currentChatId,
-    title: dom.chatTitle.textContent,
-    messages: Array.from(dom.chatMessages.children).map(msg => {
+    title: dom.chatTitle?.textContent || 'Untitled',
+    messages: Array.from(dom.chatMessages?.children || []).map(msg => {
       const contentDiv = msg.querySelector('.message-content');
       const rawContent = contentDiv?.dataset.rawContent || contentDiv?.textContent || '';
       return {

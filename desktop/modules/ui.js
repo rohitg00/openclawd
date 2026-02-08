@@ -70,10 +70,13 @@ export function handleFileSelect(event, context) {
       renderAttachedFiles(context);
     };
 
-    if (file.type.startsWith('image/')) {
-      reader.readAsDataURL(file);
-    } else {
+    const isTextFile = file.type.startsWith('text/') ||
+      ['application/json', 'application/javascript', 'application/xml'].includes(file.type);
+
+    if (isTextFile) {
       reader.readAsText(file);
+    } else {
+      reader.readAsDataURL(file);
     }
   });
   event.target.value = '';
@@ -97,7 +100,7 @@ export function renderAttachedFiles(context) {
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
       </svg>
-      <span>${file.name}</span>
+      <span>${escapeHtml(file.name)}</span>
       <svg class="remove-file" data-index="${index}" data-context="${context}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>

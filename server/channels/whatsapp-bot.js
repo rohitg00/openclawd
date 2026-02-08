@@ -10,6 +10,8 @@ export class WhatsAppBot extends BaseChannel {
     this.sock = null;
     this.qrCode = null;
     this.authDir = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 10;
   }
 
   async start(config) {
@@ -47,14 +49,22 @@ export class WhatsAppBot extends BaseChannel {
       if (connection === 'open') {
         this.active = true;
         this.qrCode = null;
+        this.reconnectAttempts = 0;
         console.log('[WhatsApp] Connected');
       }
 
       if (connection === 'close') {
         const reason = lastDisconnect?.error?.output?.statusCode;
         if (reason !== DisconnectReason.loggedOut) {
-          console.log('[WhatsApp] Reconnecting in 5s...');
-          setTimeout(() => this.start(config), 5000);
+          this.reconnectAttempts++;
+          if (this.reconnectAttempts <= this.maxReconnectAttempts) {
+            const delay = Math.min(5000 * Math.pow(2, this.reconnectAttempts - 1), 60000);
+            console.log(`[WhatsApp] Reconnecting in ${delay / 1000}s (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+            setTimeout(() => this.start(config), delay);
+          } else {
+            console.error('[WhatsApp] Max reconnection attempts reached');
+            this.active = false;
+          }
         } else {
           this.active = false;
           console.log('[WhatsApp] Logged out');

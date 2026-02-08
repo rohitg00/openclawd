@@ -63,11 +63,16 @@ export class SlackBot extends BaseChannel {
 
     await this.app.start();
 
-    const authResult = await this.app.client.auth.test({ token: config.token });
-    this.botUserId = authResult.user_id;
-
-    this.active = true;
-    console.log(`[Slack] Bot started as ${authResult.user}`);
+    try {
+      const authResult = await this.app.client.auth.test({ token: config.token });
+      this.botUserId = authResult.user_id;
+      this.active = true;
+      console.log(`[Slack] Bot started as ${authResult.user}`);
+    } catch (error) {
+      await this.app.stop();
+      this.app = null;
+      throw new Error(`Slack auth failed: ${error.message}`);
+    }
   }
 
   async stop() {

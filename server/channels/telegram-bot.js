@@ -15,10 +15,16 @@ export class TelegramBot extends BaseChannel {
     const TelegramBotApi = (await import('node-telegram-bot-api')).default;
     this.bot = new TelegramBotApi(config.token, { polling: true });
 
-    const me = await this.bot.getMe();
-    this.username = me.username;
-    this.botId = me.id;
-    console.log(`[Telegram] Bot started as @${this.username}`);
+    try {
+      const me = await this.bot.getMe();
+      this.username = me.username;
+      this.botId = me.id;
+      console.log(`[Telegram] Bot started as @${this.username}`);
+    } catch (error) {
+      await this.bot.stopPolling();
+      this.bot = null;
+      throw new Error(`Telegram getMe failed: ${error.message}`);
+    }
 
     this.bot.on('message', async (msg) => {
       if (!msg.text) return;

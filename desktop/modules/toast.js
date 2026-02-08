@@ -24,6 +24,8 @@ export function showToast(message, type = 'info') {
 
   setTimeout(() => {
     toast.classList.remove('toast-visible');
-    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+    const cleanup = () => toast.remove();
+    toast.addEventListener('transitionend', cleanup, { once: true });
+    setTimeout(cleanup, 500);
   }, 3000);
 }

@@ -7,6 +7,7 @@ export function toggleSidebar() {
   dom.rightSidebarExpand.classList.toggle('visible', isCollapsed);
 
   const icon = dom.sidebarToggle.querySelector('svg');
+  if (!icon) return;
   if (isCollapsed) {
     icon.innerHTML = '<polyline points="15 18 9 12 15 6"></polyline>';
     dom.sidebarToggle.title = 'Expand sidebar';
@@ -23,6 +24,7 @@ export function toggleLeftSidebar() {
   dom.leftSidebarExpand.classList.toggle('visible', isCollapsed);
 
   const icon = dom.leftSidebarToggle.querySelector('svg');
+  if (!icon) return;
   if (isCollapsed) {
     icon.innerHTML = '<polyline points="9 18 15 12 9 6"></polyline>';
     dom.leftSidebarToggle.title = 'Expand sidebar';

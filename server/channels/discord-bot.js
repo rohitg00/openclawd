@@ -60,8 +60,8 @@ export class DiscordBot extends BaseChannel {
           await message.reply(chunk);
         }
       } catch (error) {
-        console.error('[Discord] Error:', error.message);
-        await message.reply(`Error: ${error.message}`);
+        console.error('[Discord] Error:', error);
+        await message.reply('Sorry, an error occurred while processing your message.');
       }
     });
 
