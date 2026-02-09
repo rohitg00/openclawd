@@ -50,6 +50,10 @@ import {
   addProfile,
   removeProfile
 } from './providers/auth-profiles.js';
+import { AgentManager } from './agents/agent-manager.js';
+import { TaskManager } from './agents/task-manager.js';
+import { AgentSessionManager } from './agents/session-manager.js';
+import { createAgentRouter } from './agents/agent-routes.js';
 import {
   trackUsage,
   getUsageSummary,
@@ -821,6 +825,11 @@ await initializeMcpServers();
 await initializeLlmProviders();
 await autoStartChannels(mcpServers);
 
+const agentManager = new AgentManager();
+const taskManager = new TaskManager();
+const agentSessionManager = new AgentSessionManager(agentManager);
+app.use('/api/agents', createAgentRouter(agentManager, taskManager, agentSessionManager));
+
 const server = app.listen(PORT, () => {
   console.log(`\n✓ Backend server running on http://localhost:${PORT}`);
   console.log(`✓ Chat endpoint: POST http://localhost:${PORT}/api/chat`);
@@ -842,6 +851,7 @@ server.on('error', (err) => {
 
 process.on('SIGINT', () => {
   console.log('\nShutting down server...');
+  agentManager.killAll();
   saveUsageHistory(configDir);
   server.close(() => {
     console.log('Server closed');
