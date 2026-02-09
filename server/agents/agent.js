@@ -22,7 +22,8 @@ export class Agent {
 
   get allowedTools() {
     const preset = PERMISSION_PRESETS[this.permissions];
-    return preset ? preset.allowedTools : PERMISSION_PRESETS.full.allowedTools;
+    if (!preset) throw new Error(`Unknown permission preset: '${this.permissions}'`);
+    return preset.allowedTools;
   }
 
   _buildPrompt(message) {

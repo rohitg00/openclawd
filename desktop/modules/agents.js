@@ -1,6 +1,6 @@
 import { API_BASE } from './state.js';
 import { showToast } from './toast.js';
-import { escapeHtml } from './ui.js';
+import { escapeHtml, escapeAttr } from './ui.js';
 
 const STATUS_COLORS = {
   idle: 'var(--accent-amber)',
@@ -122,15 +122,15 @@ function renderAgentCards(container, agents) {
   for (const agent of agents) {
     const card = document.createElement('div');
     card.className = 'agent-card';
-    const safeName = escapeHtml(agent.name);
+    const attrName = escapeAttr(agent.name);
     card.innerHTML = `
       <div class="agent-card-header">
         <div class="agent-info">
           <span class="agent-status-dot" style="background: ${STATUS_COLORS[agent.status] || 'var(--text-muted)'}"></span>
-          <span class="agent-name">${safeName}</span>
+          <span class="agent-name">${escapeHtml(agent.name)}</span>
           <span class="agent-provider-badge">${escapeHtml(agent.provider || 'claude')}</span>
         </div>
-        <button class="agent-kill-btn" data-name="${safeName}">Kill</button>
+        <button class="agent-kill-btn" data-name="${attrName}">Kill</button>
       </div>
       <div class="agent-card-body">
         <div class="agent-meta">
@@ -139,10 +139,10 @@ function renderAgentCards(container, agents) {
           <span>Permissions: ${escapeHtml(agent.permissions || 'full')}</span>
         </div>
         <div class="agent-chat-area">
-          <input type="text" class="agent-msg-input" placeholder="Send message..." data-agent="${safeName}">
-          <button class="agent-send-btn" data-agent="${safeName}">Send</button>
+          <input type="text" class="agent-msg-input" placeholder="Send message..." data-agent="${attrName}">
+          <button class="agent-send-btn" data-agent="${attrName}">Send</button>
         </div>
-        <div class="agent-response" data-agent-response="${safeName}"></div>
+        <div class="agent-response" data-agent-response="${attrName}"></div>
       </div>
     `;
     grid.appendChild(card);
@@ -157,7 +157,7 @@ function renderAgentCards(container, agents) {
   grid.querySelectorAll('.agent-send-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const name = btn.dataset.agent;
-      const input = grid.querySelector(`.agent-msg-input[data-agent="${name}"]`);
+      const input = grid.querySelector(`.agent-msg-input[data-agent="${CSS.escape(name)}"]`);
       if (input?.value?.trim()) {
         sendToAgent(name, input.value.trim());
         input.value = '';
@@ -182,8 +182,7 @@ async function killAgent(name) {
 }
 
 async function sendToAgent(name, message) {
-  const safeName = escapeHtml(name);
-  const responseEl = document.querySelector(`.agent-response[data-agent-response="${safeName}"]`);
+  const responseEl = document.querySelector(`.agent-response[data-agent-response="${CSS.escape(name)}"]`);
   if (responseEl) responseEl.textContent = 'Thinking...';
 
   try {
@@ -210,7 +209,7 @@ function renderTaskSection(container, tasks) {
     <tr>
       <td>${escapeHtml(t.id)}</td>
       <td>${escapeHtml(t.title)}</td>
-      <td><span class="task-status-badge task-${escapeHtml(t.status)}">${escapeHtml(t.status)}</span></td>
+      <td><span class="task-status-badge task-${escapeAttr(t.status)}">${escapeHtml(t.status)}</span></td>
       <td>${escapeHtml(t.owner || '—')}</td>
     </tr>
   `).join('');
@@ -263,7 +262,7 @@ function renderSessionSection(container, sessions) {
     ${sessions.length > 0 ? sessions.map(s => `
       <div class="session-item">
         <span>${escapeHtml(s.name)} (${s.agents?.length || 0} agents)</span>
-        <button class="btn-secondary session-close-btn" data-id="${escapeHtml(s.id)}">Close</button>
+        <button class="btn-secondary session-close-btn" data-id="${escapeAttr(s.id)}">Close</button>
       </div>
     `).join('') : '<p style="color: var(--text-muted);">No sessions</p>'}
   `;

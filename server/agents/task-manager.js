@@ -37,6 +37,13 @@ export class TaskManager {
     const task = this.tasks.get(id);
     if (!task) throw new Error(`Task '${id}' not found`);
 
+    if (updates.status !== undefined) {
+      const validStatuses = Object.values(TASK_STATUS);
+      if (!validStatuses.includes(updates.status)) {
+        throw new Error(`Invalid status: '${updates.status}'`);
+      }
+    }
+
     const allowed = ['title', 'description', 'status', 'priority', 'blockedBy', 'blocks'];
     for (const key of allowed) {
       if (updates[key] !== undefined) {

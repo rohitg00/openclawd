@@ -39,6 +39,11 @@ describe('Agent', () => {
     expect(askAgent.allowedTools).toContain('Read');
   });
 
+  it('throws on unknown permission preset', () => {
+    const agent = new Agent({ name: 'bad-perms', permissions: 'nonexistent' });
+    expect(() => agent.allowedTools).toThrow("Unknown permission preset: 'nonexistent'");
+  });
+
   it('ask() returns a response and updates history', async () => {
     const response = await agent.ask('hello');
     expect(response).toContain('hello');

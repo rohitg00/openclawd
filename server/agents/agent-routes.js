@@ -102,6 +102,11 @@ export function createAgentRouter(agentManager, taskManager, sessionManager) {
     const { name, provider, model, systemPrompt, permissions } = req.body;
     if (!name) return res.status(400).json({ error: 'name is required' });
 
+    const reserved = ['ask', 'tasks', 'sessions'];
+    if (reserved.includes(name)) {
+      return res.status(400).json({ error: `Agent name '${name}' is reserved` });
+    }
+
     try {
       const agent = agentManager.createAgent({ name, provider, model, systemPrompt, permissions });
       res.status(201).json(agent.toJSON());

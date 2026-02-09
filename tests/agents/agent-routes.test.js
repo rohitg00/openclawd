@@ -86,6 +86,16 @@ describe('Agent Routes', () => {
         .send({ name: 'dup' });
       expect(res.status).toBe(400);
     });
+
+    it('returns 400 for reserved names', async () => {
+      for (const name of ['ask', 'tasks', 'sessions']) {
+        const res = await request(app)
+          .post('/api/agents')
+          .send({ name });
+        expect(res.status).toBe(400);
+        expect(res.body.error).toContain('reserved');
+      }
+    });
   });
 
   describe('GET /api/agents/:name', () => {

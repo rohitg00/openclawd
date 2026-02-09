@@ -5,6 +5,7 @@ export class AgentManager extends EventEmitter {
   constructor() {
     super();
     this.agents = new Map();
+    this._ephemeralId = 0;
   }
 
   createAgent(options) {
@@ -44,7 +45,7 @@ export class AgentManager extends EventEmitter {
   }
 
   async ask(message, options = {}) {
-    const name = `ephemeral_${Date.now()}`;
+    const name = `ephemeral_${Date.now()}_${this._ephemeralId++}`;
     const agent = this.createAgent({ name, ...options });
     try {
       return await agent.ask(message);

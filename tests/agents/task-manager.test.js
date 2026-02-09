@@ -51,6 +51,11 @@ describe('TaskManager', () => {
     expect(() => tm.updateTask('99', { title: 'X' })).toThrow("Task '99' not found");
   });
 
+  it('rejects invalid status values', () => {
+    tm.createTask({ title: 'Test' });
+    expect(() => tm.updateTask('1', { status: 'bogus' })).toThrow("Invalid status: 'bogus'");
+  });
+
   it('deletes a task and cleans up references', () => {
     const t1 = tm.createTask({ title: 'Blocker' });
     const t2 = tm.createTask({ title: 'Blocked' });

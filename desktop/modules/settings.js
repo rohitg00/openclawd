@@ -1,10 +1,6 @@
 import { API_BASE } from './state.js';
 import { showToast } from './toast.js';
-import { escapeHtml } from './ui.js';
-
-function escapeAttr(str) {
-  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
+import { escapeHtml, escapeAttr } from './ui.js';
 import { initUsageTab } from './usage-dashboard.js';
 import { initChannelsTab } from './channels.js';
 import { initAgentsTab } from './agents.js';
