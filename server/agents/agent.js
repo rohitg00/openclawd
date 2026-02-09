@@ -2,9 +2,10 @@ import { getProvider } from '../providers/index.js';
 import { AGENT_STATUS, PERMISSION_PRESETS } from './types.js';
 
 const MAX_HISTORY = 50;
+const DEFAULT_MAX_DEPTH = 5;
 
 export class Agent {
-  constructor({ name, provider = 'claude', model, systemPrompt, permissions = 'full' }) {
+  constructor({ name, provider = 'claude', model, systemPrompt, permissions = 'full', depth = 0, maxDepth = DEFAULT_MAX_DEPTH }) {
     if (!name) throw new Error('Agent name is required');
 
     this.name = name;
@@ -12,12 +13,18 @@ export class Agent {
     this.model = model;
     this.systemPrompt = systemPrompt || '';
     this.permissions = permissions;
+    this.depth = depth;
+    this.maxDepth = maxDepth;
     this.status = AGENT_STATUS.idle;
     this.createdAt = Date.now();
     this.chatId = `agent_${name}_${this.createdAt}`;
     this.history = [];
     this.inbox = [];
     this._queue = Promise.resolve();
+  }
+
+  canSpawnChild() {
+    return this.depth < this.maxDepth;
   }
 
   get allowedTools() {
@@ -137,6 +144,8 @@ export class Agent {
       model: this.model,
       status: this.status,
       permissions: this.permissions,
+      depth: this.depth,
+      maxDepth: this.maxDepth,
       chatId: this.chatId,
       createdAt: this.createdAt,
       messageCount: this.history.length,
