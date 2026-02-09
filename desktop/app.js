@@ -57,6 +57,14 @@ function setupEventListeners() {
 
   setupDropdowns();
 
+  document.querySelectorAll('.prompt-card').forEach(card => {
+    card.addEventListener('click', () => {
+      dom.homeInput.value = card.dataset.prompt;
+      dom.homeInput.dispatchEvent(new Event('input'));
+      dom.homeInput.focus();
+    });
+  });
+
   const chatSearchInput = document.getElementById('chatSearchInput');
   if (chatSearchInput) {
     chatSearchInput.addEventListener('input', () => {

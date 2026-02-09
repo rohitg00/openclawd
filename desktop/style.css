@@ -2393,6 +2393,8 @@ body {
   width: 90%;
   max-width: 480px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .onboarding-progress {
@@ -2420,12 +2422,25 @@ body {
 }
 
 .onboarding-step {
-  display: none;
-  animation: fadeIn 0.3s ease-out;
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
 }
 
 .onboarding-step.active {
-  display: block;
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  position: relative;
+}
+
+.onboarding-step.exit-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  pointer-events: none;
 }
 
 .onboarding-icon {
@@ -3175,4 +3190,88 @@ pre:has(.code-block-header) {
 
 .session-item:last-child {
   border-bottom: none;
+}
+
+.onboarding-key-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  margin-left: 8px;
+  min-width: 60px;
+}
+
+.onboarding-key-status .status-text {
+  font-size: 12px;
+}
+
+.onboarding-key-status.key-valid {
+  color: #22c55e;
+}
+
+.onboarding-key-status.key-invalid {
+  color: #ef4444;
+}
+
+.onboarding-key-status.key-testing {
+  color: var(--text-muted);
+}
+
+.onboarding-key-status.key-testing svg {
+  animation: spin 1s linear infinite;
+}
+
+.onboarding-provider-icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.suggested-prompts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  max-width: 600px;
+  margin: 24px auto;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.prompt-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.prompt-card:hover {
+  border-color: var(--accent-amber);
+  background: var(--bg-elevated);
+}
+
+.prompt-card svg {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-amber);
+  flex-shrink: 0;
+}
+
+.prompt-card span {
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .suggested-prompts {
+    grid-template-columns: 1fr;
+  }
 }
