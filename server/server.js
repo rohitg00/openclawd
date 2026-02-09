@@ -797,6 +797,50 @@ app.post('/api/settings', (req, res) => {
   });
 });
 
+app.post('/api/settings/test-key', async (req, res) => {
+  const { provider, apiKey } = req.body;
+  if (!provider || !apiKey) {
+    return res.status(400).json({ valid: false, error: 'Missing provider or apiKey' });
+  }
+
+  const providerConfigs = {
+    anthropic: {
+      url: 'https://api.anthropic.com/v1/models',
+      headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' }
+    },
+    openai: {
+      url: 'https://api.openai.com/v1/models',
+      headers: { Authorization: `Bearer ${apiKey}` }
+    },
+    google: {
+      url: `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`,
+      headers: {}
+    }
+  };
+
+  const config = providerConfigs[provider];
+  if (!config) {
+    return res.json({ valid: false, error: 'Unsupported provider for validation' });
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const response = await fetch(config.url, { headers: config.headers, signal: controller.signal });
+    if (response.ok) {
+      res.json({ valid: true });
+    } else {
+      const body = await response.text().catch(() => '');
+      res.json({ valid: false, error: response.status === 401 ? 'Invalid API key' : `HTTP ${response.status}: ${body.slice(0, 200)}` });
+    }
+  } catch (err) {
+    res.json({ valid: false, error: err.name === 'AbortError' ? 'Request timed out' : err.message });
+  } finally {
+    clearTimeout(timeout);
+  }
+});
+
 app.get('/api/settings/providers-status', async (_req, res) => {
   const env = loadEnvFile(envFilePath);
   const status = {};
