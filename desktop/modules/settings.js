@@ -7,6 +7,7 @@ function escapeAttr(str) {
 }
 import { initUsageTab } from './usage-dashboard.js';
 import { initChannelsTab } from './channels.js';
+import { initAgentsTab } from './agents.js';
 
 let catalogData = [];
 let installedServerIds = new Set();
@@ -70,6 +71,9 @@ export function initSettings() {
       }
       if (tabId === 'channels') {
         initChannelsTab();
+      }
+      if (tabId === 'agents') {
+        initAgentsTab();
       }
     });
   });
