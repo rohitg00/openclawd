@@ -1,4 +1,4 @@
-import { API_BASE } from './state.js';
+import { API_BASE, authFetch } from './state.js';
 import { showToast } from './toast.js';
 import { escapeHtml, escapeAttr } from './ui.js';
 
@@ -17,9 +17,9 @@ export async function initAgentsTab() {
 
   try {
     const [agentsRes, tasksRes, sessionsRes] = await Promise.all([
-      fetch(`${API_BASE}/api/agents`),
-      fetch(`${API_BASE}/api/agents/tasks`),
-      fetch(`${API_BASE}/api/agents/sessions`)
+      authFetch(`${API_BASE}/api/agents`),
+      authFetch(`${API_BASE}/api/agents/tasks`),
+      authFetch(`${API_BASE}/api/agents/sessions`)
     ]);
 
     if (!agentsRes.ok) throw new Error('Failed to fetch agents');
@@ -89,7 +89,7 @@ async function spawnAgent() {
   }
 
   try {
-    const res = await fetch(`${API_BASE}/api/agents`, {
+    const res = await authFetch(`${API_BASE}/api/agents`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, provider, permissions, systemPrompt: systemPrompt || undefined })
@@ -168,7 +168,7 @@ function renderAgentCards(container, agents) {
 
 async function killAgent(name) {
   try {
-    const res = await fetch(`${API_BASE}/api/agents/${encodeURIComponent(name)}/kill`, { method: 'POST' });
+    const res = await authFetch(`${API_BASE}/api/agents/${encodeURIComponent(name)}/kill`, { method: 'POST' });
     if (res.ok) {
       showToast(`Agent "${name}" killed`, 'info');
       initAgentsTab();
@@ -186,7 +186,7 @@ async function sendToAgent(name, message) {
   if (responseEl) responseEl.textContent = 'Thinking...';
 
   try {
-    const res = await fetch(`${API_BASE}/api/agents/${encodeURIComponent(name)}/ask`, {
+    const res = await authFetch(`${API_BASE}/api/agents/${encodeURIComponent(name)}/ask`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message })
@@ -237,7 +237,7 @@ function renderTaskSection(container, tasks) {
     if (!title) return;
 
     try {
-      const res = await fetch(`${API_BASE}/api/agents/tasks`, {
+      const res = await authFetch(`${API_BASE}/api/agents/tasks`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title })
@@ -271,7 +271,7 @@ function renderSessionSection(container, sessions) {
 
   section.querySelector('#create-session-btn')?.addEventListener('click', async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/agents/sessions`, {
+      const res = await authFetch(`${API_BASE}/api/agents/sessions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -288,7 +288,7 @@ function renderSessionSection(container, sessions) {
   section.querySelectorAll('.session-close-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/agents/sessions/${encodeURIComponent(btn.dataset.id)}`, { method: 'DELETE' });
+        const res = await authFetch(`${API_BASE}/api/agents/sessions/${encodeURIComponent(btn.dataset.id)}`, { method: 'DELETE' });
         if (res.ok) {
           showToast('Session closed', 'info');
           initAgentsTab();

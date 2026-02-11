@@ -1,4 +1,21 @@
-export const API_BASE = 'http://localhost:3001';
+export const API_BASE = (typeof window !== 'undefined' && window.electronAPI?.getServerUrl)
+  ? window.electronAPI.getServerUrl()
+  : 'http://localhost:3001';
+
+export function getApiKey() {
+  return (typeof window !== 'undefined' && window.electronAPI?.getApiKey)
+    ? window.electronAPI.getApiKey()
+    : null;
+}
+
+export async function authFetch(url, options = {}) {
+  const apiKey = getApiKey();
+  const headers = { ...(options.headers || {}) };
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
+  return fetch(url, { ...options, headers });
+}
 
 export const providerModels = {
   claude: [
