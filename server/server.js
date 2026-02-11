@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import dotenv from 'dotenv';
 import { loadEnvFile, saveEnvFile } from './env-utils.js';
+import { createAuthMiddleware, generateApiKey } from './auth-middleware.js';
 import {
   startChannel,
   stopChannel,
@@ -73,6 +74,18 @@ const envFilePath = process.env.OPENCLAWD_envFilePath || path.join(__dirname, '.
 
 dotenv.config({ path: envFilePath });
 
+// Auto-generate API key on first run if not already configured
+if (!process.env.OPENCLAWD_API_KEY) {
+  const newApiKey = generateApiKey();
+  const env = loadEnvFile(envFilePath);
+  env.OPENCLAWD_API_KEY = newApiKey;
+  saveEnvFile(envFilePath, env);
+  process.env.OPENCLAWD_API_KEY = newApiKey;
+  console.log('[Auth] Generated new API key (saved to .env)');
+} else {
+  console.log('[Auth] API key loaded from configuration');
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -117,6 +130,7 @@ app.use(cors({
   }
 }));
 app.use(express.json());
+app.use(createAuthMiddleware());
 
 const generalLimiter = rateLimit({
   windowMs: 60 * 1000,

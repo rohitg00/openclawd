@@ -1,4 +1,4 @@
-import { API_BASE, dom, safeSetItem } from './state.js';
+import { API_BASE, authFetch, dom, safeSetItem } from './state.js';
 
 let testKeyTimers = {};
 
@@ -65,7 +65,7 @@ async function testApiKey(provider, apiKey) {
   statusEl.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span class="status-text">Testing...</span>';
 
   try {
-    const response = await fetch(`${API_BASE}/api/settings/test-key`, {
+    const response = await authFetch(`${API_BASE}/api/settings/test-key`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ provider, apiKey })
@@ -120,7 +120,7 @@ export async function saveOnboardingKeys() {
   let errorEl = step2?.querySelector('.onboarding-error');
 
   try {
-    const response = await fetch(`${API_BASE}/api/settings`, {
+    const response = await authFetch(`${API_BASE}/api/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ apiKeys: keys })
@@ -158,7 +158,7 @@ export async function saveOnboardingMcp() {
 
   for (const serverId of selected) {
     try {
-      await fetch(`${API_BASE}/api/mcp/servers/from-catalog/${serverId}`, {
+      await authFetch(`${API_BASE}/api/mcp/servers/from-catalog/${serverId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ enabled: true })

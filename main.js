@@ -3,6 +3,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
+const crypto = require('crypto');
 
 function isSafeExternalUrl(url) {
   try {
@@ -55,6 +56,48 @@ function getMcpExamplePath() {
   return path.join(process.resourcesPath, 'mcp-servers.example.json');
 }
 
+function loadEnvFile(envPath) {
+  if (!fs.existsSync(envPath)) return {};
+  const content = fs.readFileSync(envPath, 'utf-8');
+  const env = {};
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIndex = trimmed.indexOf('=');
+    if (eqIndex > 0) {
+      const key = trimmed.slice(0, eqIndex).trim();
+      let value = trimmed.slice(eqIndex + 1).trim();
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1);
+      }
+      env[key] = value;
+    }
+  }
+  return env;
+}
+
+function saveEnvFile(envPath, env) {
+  const lines = ['# OpenClawd Configuration', ''];
+  for (const [key, value] of Object.entries(env)) {
+    if (value !== undefined && value !== null) lines.push(`${key}=${value}`);
+  }
+  fs.writeFileSync(envPath, lines.join('\n') + '\n');
+}
+
+function ensureApiKey() {
+  const envPath = path.join(userDataPath, '.env');
+  const env = loadEnvFile(envPath);
+  if (!env.OPENCLAWD_API_KEY) {
+    const newApiKey = 'oc_' + crypto.randomBytes(32).toString('hex');
+    env.OPENCLAWD_API_KEY = newApiKey;
+    saveEnvFile(envPath, env);
+    process.env.OPENCLAWD_API_KEY = newApiKey;
+    console.log('[Config] Generated API key (saved to .env)');
+  } else {
+    process.env.OPENCLAWD_API_KEY = env.OPENCLAWD_API_KEY;
+  }
+}
+
 function ensureConfigFiles() {
   const envPath = path.join(userDataPath, '.env');
   const mcpPath = path.join(userDataPath, 'mcp-servers.json');
@@ -66,6 +109,8 @@ function ensureConfigFiles() {
       console.log('[Config] Created .env from example at', envPath);
     }
   }
+
+  ensureApiKey();
 
   if (!fs.existsSync(mcpPath)) {
     const exampleMcp = getMcpExamplePath();

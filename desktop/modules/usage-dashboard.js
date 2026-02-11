@@ -1,4 +1,4 @@
-import { API_BASE } from './state.js';
+import { API_BASE, authFetch } from './state.js';
 import { escapeHtml } from './ui.js';
 
 export async function initUsageTab() {
@@ -9,8 +9,8 @@ export async function initUsageTab() {
 
   try {
     const [usageRes, historyRes] = await Promise.all([
-      fetch(`${API_BASE}/api/llm/usage`),
-      fetch(`${API_BASE}/api/llm/usage/history`)
+      authFetch(`${API_BASE}/api/llm/usage`),
+      authFetch(`${API_BASE}/api/llm/usage/history`)
     ]);
 
     if (!usageRes.ok || !historyRes.ok) {

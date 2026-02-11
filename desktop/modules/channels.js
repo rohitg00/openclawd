@@ -1,4 +1,4 @@
-import { API_BASE } from './state.js';
+import { API_BASE, authFetch } from './state.js';
 import { showToast } from './toast.js';
 import { escapeHtml } from './ui.js';
 
@@ -24,8 +24,8 @@ export async function initChannelsTab() {
 
   try {
     const [statusRes, sessionsRes] = await Promise.all([
-      fetch(`${API_BASE}/api/channels/status`),
-      fetch(`${API_BASE}/api/channels/sessions`)
+      authFetch(`${API_BASE}/api/channels/status`),
+      authFetch(`${API_BASE}/api/channels/sessions`)
     ]);
 
     if (!statusRes.ok || !sessionsRes.ok) {
@@ -107,7 +107,7 @@ function createChannelCard(channelId, status) {
 async function toggleChannel(channelId, isCurrentlyActive) {
   if (isCurrentlyActive) {
     try {
-      const res = await fetch(`${API_BASE}/api/channels/${channelId}/stop`, { method: 'POST' });
+      const res = await authFetch(`${API_BASE}/api/channels/${channelId}/stop`, { method: 'POST' });
       if (res.ok) {
         showToast(`${CHANNEL_LABELS[channelId]} stopped`, 'info');
         initChannelsTab();
@@ -134,7 +134,7 @@ async function toggleChannel(channelId, isCurrentlyActive) {
     }
 
     try {
-      const res = await fetch(`${API_BASE}/api/channels/${channelId}/start`, {
+      const res = await authFetch(`${API_BASE}/api/channels/${channelId}/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config)

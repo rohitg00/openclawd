@@ -6,8 +6,20 @@ const SERVER_URL = `http://localhost:${SERVER_PORT}`;
 // Store the current abort controller for cancelling requests
 let currentAbortController = null;
 
+function getAuthHeaders() {
+  const headers = { 'Content-Type': 'application/json' };
+  const apiKey = process.env.OPENCLAWD_API_KEY;
+  if (apiKey) {
+    headers.Authorization = `Bearer ${apiKey}`;
+  }
+  return headers;
+}
+
 // Expose safe API to renderer process via contextBridge
 contextBridge.exposeInMainWorld('electronAPI', {
+  getApiKey: () => process.env.OPENCLAWD_API_KEY || null,
+  getServerUrl: () => `http://localhost:${process.env.OPENCLAWD_SERVER_PORT || '3456'}`,
+
   // Abort the current ongoing request (client-side)
   abortCurrentRequest: () => {
     if (currentAbortController) {
@@ -23,9 +35,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     try {
       const response = await fetch(`${SERVER_URL}/api/abort`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ chatId, provider })
       });
       const result = await response.json();
@@ -56,9 +66,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
       fetch(`${SERVER_URL}/api/chat`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ message, chatId, provider, model }),
         signal
       })
@@ -106,7 +114,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Get available providers from backend
   getProviders: async () => {
     try {
-      const response = await fetch(`${SERVER_URL}/api/providers`);
+      const response = await fetch(`${SERVER_URL}/api/providers`, {
+        headers: getAuthHeaders()
+      });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }

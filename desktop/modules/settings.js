@@ -1,4 +1,4 @@
-import { API_BASE } from './state.js';
+import { API_BASE, authFetch } from './state.js';
 import { showToast } from './toast.js';
 import { escapeHtml, escapeAttr } from './ui.js';
 import { initUsageTab } from './usage-dashboard.js';
@@ -119,7 +119,7 @@ export function initSettings() {
 
 async function loadProviderStatus() {
   try {
-    const response = await fetch(`${API_BASE}/api/settings/providers-status`);
+    const response = await authFetch(`${API_BASE}/api/settings/providers-status`);
     const data = await response.json();
 
     for (const [provider, configured] of Object.entries(data.status)) {
@@ -143,7 +143,7 @@ async function checkConnection() {
   const statusText = document.querySelector('.status-text');
 
   try {
-    const response = await fetch(`${API_BASE}/api/health`);
+    const response = await authFetch(`${API_BASE}/api/health`);
     const data = await response.json();
 
     if (statusDot && statusText) {
@@ -163,7 +163,7 @@ async function loadMcpServers() {
   if (!listEl) return;
 
   try {
-    const response = await fetch(`${API_BASE}/api/mcp/servers`);
+    const response = await authFetch(`${API_BASE}/api/mcp/servers`);
     if (!response.ok) throw new Error('Failed to load servers');
     const data = await response.json();
 
@@ -201,7 +201,7 @@ async function loadMcpServers() {
         const endpoint = isEnabled ? 'disable' : 'enable';
 
         try {
-          const res = await fetch(`${API_BASE}/api/mcp/servers/${serverName}/${endpoint}`, { method: 'PUT' });
+          const res = await authFetch(`${API_BASE}/api/mcp/servers/${serverName}/${endpoint}`, { method: 'PUT' });
           if (!res.ok) throw new Error('Toggle failed');
           toggle.classList.toggle('enabled');
           const desc = toggle.closest('.mcp-server-item').querySelector('.mcp-server-desc');
@@ -219,7 +219,7 @@ async function loadMcpServers() {
         if (!confirm(`Remove "${serverName}" server?`)) return;
 
         try {
-          const response = await fetch(`${API_BASE}/api/mcp/servers/${serverName}`, { method: 'DELETE' });
+          const response = await authFetch(`${API_BASE}/api/mcp/servers/${serverName}`, { method: 'DELETE' });
           if (response.ok) {
             loadMcpServers();
           } else {
@@ -246,7 +246,7 @@ async function loadCatalog(category = 'all') {
   try {
     await loadInstalledServerIds();
     const endpoint = category === 'all' ? '/api/mcp/catalog' : `/api/mcp/catalog/${category}`;
-    const response = await fetch(`${API_BASE}${endpoint}`);
+    const response = await authFetch(`${API_BASE}${endpoint}`);
     const data = await response.json();
 
     catalogData = data.servers;
@@ -259,7 +259,7 @@ async function loadCatalog(category = 'all') {
 
 async function loadInstalledServerIds() {
   try {
-    const response = await fetch(`${API_BASE}/api/mcp/servers`);
+    const response = await authFetch(`${API_BASE}/api/mcp/servers`);
     const data = await response.json();
     installedServerIds = new Set(data.servers.map(s => s.name));
   } catch (err) {
@@ -296,7 +296,7 @@ function renderCatalog(servers) {
       btn.disabled = true;
 
       try {
-        const response = await fetch(`${API_BASE}/api/mcp/servers/from-catalog/${serverId}`, {
+        const response = await authFetch(`${API_BASE}/api/mcp/servers/from-catalog/${serverId}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({})
@@ -410,7 +410,7 @@ function initAddServerForm() {
     saveNewServerBtn.disabled = true;
 
     try {
-      const response = await fetch(`${API_BASE}/api/mcp/servers`, {
+      const response = await authFetch(`${API_BASE}/api/mcp/servers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -445,7 +445,7 @@ function initJsonEditor() {
 
   viewJsonBtn?.addEventListener('click', async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/mcp/config`);
+      const response = await authFetch(`${API_BASE}/api/mcp/config`);
       const data = await response.json();
       if (mcpJsonEditor) mcpJsonEditor.value = JSON.stringify(data.config || {}, null, 2);
       jsonEditorSection?.classList.remove('hidden');
@@ -477,7 +477,7 @@ function initJsonEditor() {
     saveJsonEditBtn.disabled = true;
 
     try {
-      const response = await fetch(`${API_BASE}/api/mcp/config`, {
+      const response = await authFetch(`${API_BASE}/api/mcp/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ config })
@@ -534,7 +534,7 @@ function initSaveSettings(saveSettingsBtn, closeSettings) {
     saveSettingsBtn.disabled = true;
 
     try {
-      const response = await fetch(`${API_BASE}/api/settings`, {
+      const response = await authFetch(`${API_BASE}/api/settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKeys: keysToSave, general })
@@ -559,7 +559,7 @@ function initSaveSettings(saveSettingsBtn, closeSettings) {
       }
     } catch (err) {
       console.error('Failed to save settings:', err);
-      saveSettingsBtn.textContent = 'Error';
+      saveSettingsBtn.textContent = 'Save failed';
       setTimeout(() => {
         saveSettingsBtn.textContent = 'Save Changes';
         saveSettingsBtn.disabled = false;

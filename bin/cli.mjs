@@ -139,6 +139,13 @@ async function runOnboarding() {
   p.outro(color.green('Setup complete!'));
 }
 
+function getAuthHeaders() {
+  const key = process.env.OPENCLAWD_API_KEY || loadEnvFile().OPENCLAWD_API_KEY;
+  const headers = { 'Content-Type': 'application/json' };
+  if (key) headers.Authorization = `Bearer ${key}`;
+  return headers;
+}
+
 async function installMcpServers(servers) {
   const baseUrl = `http://localhost:${PORT}`;
   let serverHealthy = false;
@@ -160,11 +167,13 @@ async function installMcpServers(servers) {
     return;
   }
 
+  const authHeaders = getAuthHeaders();
+
   for (const serverId of servers) {
     try {
       await fetch(`${baseUrl}/api/mcp/servers/from-catalog/${serverId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({ enabled: true }),
       });
       console.log(`  ${color.green('+')} MCP server ${color.bold(serverId)} installed`);
