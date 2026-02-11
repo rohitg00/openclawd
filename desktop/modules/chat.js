@@ -6,8 +6,9 @@ import { addUserMessage, createAssistantMessage, addToolCall, addInlineToolCall,
 import { updateProviderUI } from './dropdowns.js';
 
 export function loadChat(chat) {
+  if (!chat) return;
   state.currentChatId = chat.id;
-  dom.chatTitle.textContent = chat.title;
+  if (dom.chatTitle) dom.chatTitle.textContent = chat.title;
   state.isFirstMessage = false;
   state.todos = chat.todos || [];
   state.toolCalls = chat.toolCalls || [];
@@ -37,6 +38,7 @@ export function loadChat(chat) {
 
   switchToChatView();
 
+  if (!dom.chatMessages) return;
   dom.chatMessages.innerHTML = '';
   (chat.messages || []).forEach(msgData => {
     const messageDiv = document.createElement('div');
@@ -89,6 +91,7 @@ export function loadChat(chat) {
 }
 
 export function renderChatHistory(filter = '') {
+  if (!dom.chatHistoryList) return;
   dom.chatHistoryList.innerHTML = '';
 
   if (state.allChats.length === 0) {
@@ -183,29 +186,29 @@ export function startNewChat() {
     state.isWaitingForResponse = false;
   }
 
-  if (state.currentChatId && dom.chatMessages.children.length > 0) {
+  if (state.currentChatId && dom.chatMessages?.children?.length > 0) {
     saveState();
   }
 
   state.currentChatId = null;
-  dom.chatMessages.innerHTML = '';
-  dom.messageInput.value = '';
-  dom.homeInput.value = '';
-  dom.chatTitle.textContent = 'New chat';
+  if (dom.chatMessages) dom.chatMessages.innerHTML = '';
+  if (dom.messageInput) dom.messageInput.value = '';
+  if (dom.homeInput) dom.homeInput.value = '';
+  if (dom.chatTitle) dom.chatTitle.textContent = 'New chat';
   state.isFirstMessage = true;
   state.todos = [];
   state.toolCalls = [];
   state.attachedFiles = [];
 
-  dom.stepsList.innerHTML = '';
-  dom.emptySteps.style.display = 'block';
-  dom.stepsCount.textContent = '0 steps';
-  dom.toolCallsList.innerHTML = '';
-  dom.emptyTools.style.display = 'block';
+  if (dom.stepsList) dom.stepsList.innerHTML = '';
+  if (dom.emptySteps) dom.emptySteps.style.display = 'block';
+  if (dom.stepsCount) dom.stepsCount.textContent = '0 steps';
+  if (dom.toolCallsList) dom.toolCallsList.innerHTML = '';
+  if (dom.emptyTools) dom.emptyTools.style.display = 'block';
 
-  dom.homeView.classList.remove('hidden');
-  dom.chatView.classList.add('hidden');
-  dom.homeInput.focus();
+  dom.homeView?.classList.remove('hidden');
+  dom.chatView?.classList.add('hidden');
+  requestAnimationFrame(() => dom.homeInput?.focus());
 
   localStorage.removeItem('currentChatId');
   renderChatHistory();
@@ -252,6 +255,7 @@ export async function handleSendMessage(e) {
   }
 
   const input = state.isFirstMessage ? dom.homeInput : dom.messageInput;
+  if (!input) return;
   const message = input.value.trim();
 
   if (!message) return;
@@ -478,8 +482,9 @@ export async function handleSendMessage(e) {
     }
     state.isWaitingForResponse = false;
     saveState();
+    renderChatHistory();
     updateSendButton(dom.messageInput, dom.chatSendBtn);
     updateSendButton(dom.homeInput, dom.homeSendBtn);
-    dom.messageInput.focus();
+    dom.messageInput?.focus();
   }
 }

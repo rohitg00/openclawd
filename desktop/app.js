@@ -16,7 +16,7 @@ function init() {
   if (!localStorage.getItem('onboarding_complete')) {
     showOnboarding();
   } else {
-    dom.homeInput.focus();
+    requestAnimationFrame(() => dom.homeInput?.focus());
   }
 
   initSettings();
@@ -25,25 +25,29 @@ function init() {
 }
 
 function setupEventListeners() {
-  dom.homeForm.addEventListener('submit', handleSendMessage);
-  dom.homeInput.addEventListener('input', () => {
-    updateSendButton(dom.homeInput, dom.homeSendBtn);
-    autoResizeTextarea(dom.homeInput);
-  });
-  dom.homeInput.addEventListener('keydown', (e) => handleKeyPress(e, dom.homeForm));
+  if (dom.homeForm) dom.homeForm.addEventListener('submit', handleSendMessage);
+  if (dom.homeInput) {
+    dom.homeInput.addEventListener('input', () => {
+      updateSendButton(dom.homeInput, dom.homeSendBtn);
+      autoResizeTextarea(dom.homeInput);
+    });
+    dom.homeInput.addEventListener('keydown', (e) => handleKeyPress(e, dom.homeForm));
+  }
 
-  dom.chatForm.addEventListener('submit', handleSendMessage);
-  dom.messageInput.addEventListener('input', () => {
-    updateSendButton(dom.messageInput, dom.chatSendBtn);
-    autoResizeTextarea(dom.messageInput);
-  });
-  dom.messageInput.addEventListener('keydown', (e) => handleKeyPress(e, dom.chatForm));
+  if (dom.chatForm) dom.chatForm.addEventListener('submit', handleSendMessage);
+  if (dom.messageInput) {
+    dom.messageInput.addEventListener('input', () => {
+      updateSendButton(dom.messageInput, dom.chatSendBtn);
+      autoResizeTextarea(dom.messageInput);
+    });
+    dom.messageInput.addEventListener('keydown', (e) => handleKeyPress(e, dom.chatForm));
+  }
 
-  dom.sidebarToggle.addEventListener('click', toggleSidebar);
-  dom.rightSidebarExpand.addEventListener('click', toggleSidebar);
+  if (dom.sidebarToggle) dom.sidebarToggle.addEventListener('click', toggleSidebar);
+  if (dom.rightSidebarExpand) dom.rightSidebarExpand.addEventListener('click', toggleSidebar);
 
-  dom.leftSidebarToggle.addEventListener('click', toggleLeftSidebar);
-  dom.leftSidebarExpand.addEventListener('click', toggleLeftSidebar);
+  if (dom.leftSidebarToggle) dom.leftSidebarToggle.addEventListener('click', toggleLeftSidebar);
+  if (dom.leftSidebarExpand) dom.leftSidebarExpand.addEventListener('click', toggleLeftSidebar);
 
   const homeAttachBtn = document.getElementById('homeAttachBtn');
   const chatAttachBtn = document.getElementById('chatAttachBtn');

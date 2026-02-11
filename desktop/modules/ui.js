@@ -25,12 +25,13 @@ export function resetTextareaHeight(textarea) {
 }
 
 export function switchToChatView() {
-  dom.homeView.classList.add('hidden');
-  dom.chatView.classList.remove('hidden');
-  dom.messageInput.focus();
+  dom.homeView?.classList.add('hidden');
+  dom.chatView?.classList.remove('hidden');
+  requestAnimationFrame(() => dom.messageInput?.focus());
 }
 
 export function updateSendButton(input, button) {
+  if (!input || !button) return;
   if (state.isWaitingForResponse) {
     button.disabled = false;
     button.classList.add('streaming');
